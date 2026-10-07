@@ -120,3 +120,12 @@ src/
   proxy.ts             proteção otimista das rotas /admin
 supabase/migrations/   schema, RLS, realtime, seed
 ```
+
+---
+
+## Testes de migrações
+
+```bash
+npm i --no-save embedded-postgres pg
+node scripts/test-migrations.mjs   # 35 verificações num PostgreSQL temporário
+```

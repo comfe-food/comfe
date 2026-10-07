@@ -43,3 +43,12 @@ Regra aplicada: quando algo é ambíuo, escolhe-se a opção mais simples e regi
 
 - Upload de fotos para o bucket `dish-images` (leitura pública, escrita só admin) com extensão e tipo validados; `next/image` serve com otimização.
 - `public/sounds/new-order.mp3` é um clipe curto gerado por script (`scripts/generate-sound.mjs`) para não depender de binários externos (ffmpeg) no ambiente de build.
+
+## Base de dados (Fase 2)
+
+- **`site_settings` ganhou a coluna `is_public boolean`** (o esquema do enunciado só tinha `key/value/description`). Em vez de uma lista de chaves fixa na política RLS, cada chave indica se o site público pode lê-la — mais simples de manter quando se acrescentam chaves.
+- **`order_number` é `bigint generated always as identity`** em vez de `serial`: não pode ser editado e não depende de uma sequence separada.
+- **O trigger `handle_new_user` cria automaticamente o perfil com `role = 'admin'`** quando surge um utilizador no `auth.users` (utilizadores são criados no painel do Supabase, não há registo público). Consequência importante: **o "Sign up" do Supabase Auth tem de continuar desativado**, senão qualquer pessoa criava conta de admin. Um utilizador *sem* perfil não tem qualquer acesso (testado).
+- **Histórico de estados** passa a ser preenchido por trigger (`log_order_status_change`), incluindo `changed_by = auth.uid()`; mudanças de estado repetidas não duplicam entradas.
+- **Tipos TypeScript**: `src/lib/database.types.ts` segue o formato do `database.types.ts` gerado pelo Supabase CLI, e `src/lib/types.ts` guarda as interfaces de domínio. Não usámos o CLI porque não há Docker no ambiente de trabalho.
+- **Validação real das migrações**: `node scripts/test-migrations.mjs` sobe um PostgreSQL 18 efémero com um stub do ambiente Supabase (`auth`, `storage`, papéis, publication) e corre 35 verificações (schema, RLS, triggers, realtime, seed, idempotência). Correr com `npm i --no-save embedded-postgres pg`.
