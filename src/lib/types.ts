@@ -10,26 +10,26 @@ export type PaymentStatus = "pending" | "paid" | "failed" | "refunded";
 
 export type PaymentMode = "mbway_api" | "manual";
 
-export interface Profile {
+export type Profile = {
   id: string;
   role: "admin";
   created_at: string;
 }
 
-export interface Allergen {
+export type Allergen = {
   code: string;
   name_pt: string;
   sort_order: number;
 }
 
-export interface Category {
+export type Category = {
   id: string;
   name: string;
   sort_order: number;
   is_active: boolean;
 }
 
-export interface Dish {
+export type Dish = {
   id: string;
   category_id: string | null;
   name: string;
@@ -46,7 +46,7 @@ export interface Dish {
   updated_at: string;
 }
 
-export interface OptionGroup {
+export type OptionGroup = {
   id: string;
   dish_id: string;
   name: string;
@@ -57,7 +57,7 @@ export interface OptionGroup {
   options?: Option[];
 }
 
-export interface Option {
+export type Option = {
   id: string;
   group_id: string;
   name: string;
@@ -66,14 +66,14 @@ export interface Option {
   sort_order: number;
 }
 
-export interface NotePreset {
+export type NotePreset = {
   id: string;
   label: string;
   sort_order: number;
   is_active: boolean;
 }
 
-export interface Order {
+export type Order = {
   id: string;
   public_token: string;
   order_number: number;
@@ -92,7 +92,7 @@ export interface Order {
   updated_at: string;
 }
 
-export interface OrderItem {
+export type OrderItem = {
   id: string;
   order_id: string;
   dish_id: string | null;
@@ -104,13 +104,13 @@ export interface OrderItem {
   line_total: string;
 }
 
-export interface SelectedOption {
+export type SelectedOption = {
   group: string;
   option: string;
   extra_price: number | string;
 }
 
-export interface OrderStatusHistory {
+export type OrderStatusHistory = {
   id: string;
   order_id: string;
   status: OrderStatus;
@@ -118,20 +118,20 @@ export interface OrderStatusHistory {
   created_at: string;
 }
 
-export interface SiteSetting {
+export type SiteSetting = {
   key: string;
   value: unknown;
   description: string | null;
   updated_at: string;
 }
 
-export interface OpeningHours {
+export type OpeningHours = {
   open: string;
   close: string;
   days: number[];
 }
 
-export interface SiteSettingsMap {
+export type SiteSettingsMap = {
   brand_name: string;
   phone: string;
   whatsapp_number: string;
