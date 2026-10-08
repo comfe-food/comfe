@@ -20,15 +20,15 @@ export function SiteFooter({ settings }: { settings: SiteSettingsMap }) {
       : hours.days.map((d) => dayNames[d]).join(", ");
 
   return (
-    <footer className="mt-auto bg-indigo text-cream">
+    <footer className="mt-auto bg-accent text-paper">
       <div className="mx-auto grid max-w-3xl gap-6 px-4 py-8 text-sm sm:grid-cols-3">
         <div>
           <p className="font-display text-xl">{settings.brand_name}</p>
-          <p className="mt-2 text-cream/80">{settings.pickup_only_notice}</p>
+          <p className="mt-2 text-paper/80">{settings.pickup_only_notice}</p>
         </div>
 
         <div>
-          <h2 className="text-xs font-bold tracking-wide uppercase text-cream/70">
+          <h2 className="font-sans text-xs font-bold uppercase tracking-wide text-paper/80">
             Horário
           </h2>
           <p className="mt-2">
@@ -39,7 +39,7 @@ export function SiteFooter({ settings }: { settings: SiteSettingsMap }) {
         </div>
 
         <div>
-          <h2 className="text-xs font-bold tracking-wide uppercase text-cream/70">
+          <h2 className="font-sans text-xs font-bold uppercase tracking-wide text-paper/80">
             Contactos
           </h2>
           <p className="mt-2 flex flex-col gap-1">
@@ -68,8 +68,8 @@ export function SiteFooter({ settings }: { settings: SiteSettingsMap }) {
         </div>
       </div>
 
-      <div className="border-t border-cream/20">
-        <div className="mx-auto max-w-3xl space-y-2 px-4 py-5 text-2xs text-cream/75">
+      <div className="border-t border-paper/20">
+        <div className="mx-auto max-w-3xl space-y-2 px-4 py-5 text-2xs text-paper/80">
           <p>{getStaticConfig().seo.allergenNotice}</p>
           <p>{t("allergensDisclaimer")}</p>
           <p className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-1">

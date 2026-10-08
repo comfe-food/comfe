@@ -19,6 +19,7 @@
     "brandShort": "Comfe",
     "cart": "Ver pedido",
     "addToCart": "Adicionar",
+    "viewDish": "Ver prato",
     "addToOrder": "Adicionar ao pedido",
     "addedToCart": "Adicionado ao pedido",
     "viewOrder": "Ver pedido",
@@ -98,10 +99,8 @@
     "allergenNotice": "A Comfe informa que os 14 alergénios de declaração obrigatória da UE estão disponíveis em cada prato."
   },
   "design": {
-    "cream": "#F0E3AA",
-    "indigo": "#414770",
-    "fontDisplay": "Archivo Black",
-    "fontBody": "Open Sans",
+    "fontDisplay": "Fraunces",
+    "fontBody": "DM Sans",
     "minTapTarget": 44
   }
 }

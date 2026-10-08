@@ -42,7 +42,7 @@ Regra aplicada: quando algo é ambíuo, escolhe-se a opção mais simples e regi
 ## Imagens e som
 
 - Upload de fotos para o bucket `dish-images` (leitura pública, escrita só admin) com extensão e tipo validados; `next/image` serve com otimização.
-- `public/sounds/new-order.mp3` é um clipe curto gerado por script (`scripts/generate-sound.mjs`) para não depender de binários externos (ffmpeg) no ambiente de build.
+- `public/sounds/new-order.wav` é um clipe curto gerado por script (`scripts/generate-sound.mjs`) para não depender de binários externos (ffmpeg) no ambiente de build. O som repete a cada 10 s enquanto houver pedidos por abrir.
 
 ## Base de dados (Fase 2)
 

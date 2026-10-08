@@ -25,7 +25,7 @@ Comandos úteis:
 | `npm run start` | Serve o build |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm run sound` | Gera `public/sounds/new-order.mp3` |
+| `npm run sound` | Gera `public/sounds/new-order.wav` |
 
 Sem variáveis de ambiente o site arranca em modo "vazio" (menu vazio, sem BD) — útil para ver a UI, inútil para testar pedidos.
 
@@ -62,13 +62,9 @@ Vê [`.env.example`](./.env.example). Resumo:
    - `0002_rls.sql` — Row Level Security
    - `0003_realtime.sql` — Realtime na tabela `orders`
    - `0004_seed.sql` — alergénios, categorias, pratos de exemplo, presets e `site_settings`
-3. Cria um utilizador admin em **Authentication → Users → Add user** (email + palavra-passe) e, no SQL Editor:
-   ```sql
-   insert into public.profiles (id, role)
-   values ('<uuid-do-utilizador>', 'admin');
-   ```
+3. Cria um utilizador admin em **Authentication → Users → Add user** (email + palavra-passe). O perfil com `role = 'admin'` é criado automaticamente pelo trigger `handle_new_user` — não precisas de inserir nada no SQL Editor. **Mantém o "Sign up" desativado** em Authentication → Settings: só deves ter contas criadas por ti.
 4. **Storage:** cria o bucket público `dish-images` (Storage → New bucket → *Public bucket*). Políticas de escrita já vêm nas migrações.
-5. Copia *Project URL* e *anon key* para o `.env.local`.
+5. Copia *Project URL*, *anon key* e a *service role key* para o `.env.local` (vê o passo 2).
 
 ---
 

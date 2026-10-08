@@ -68,7 +68,7 @@ export default function PrivacyPage() {
       </div>
 
       <p className="mt-8">
-        <Link href="/" className="btn btn-secondary">
+        <Link href="/" className="font-semibold underline underline-offset-4">
           ← {t("backToMenu")}
         </Link>
       </p>

@@ -1,19 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo_Black, Open_Sans } from "next/font/google";
+import { DM_Sans, Fraunces } from "next/font/google";
 import { getStaticConfig } from "@/lib/static-config";
 import "./globals.css";
 
-const archivoBlack = Archivo_Black({
-  weight: "400",
+const fraunces = Fraunces({
   subsets: ["latin"],
-  variable: "--font-archivo-black",
+  axes: ["opsz"],
+  variable: "--font-fraunces",
   display: "swap",
 });
 
-const openSans = Open_Sans({
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
-  variable: "--font-open-sans",
+  variable: "--font-dm-sans",
   display: "swap",
 });
 
@@ -44,7 +43,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#414770",
+  themeColor: "#f7f3ea",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -54,7 +53,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="pt-PT"
-      className={`${archivoBlack.variable} ${openSans.variable} h-full antialiased`}
+      className={`${fraunces.variable} ${dmSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

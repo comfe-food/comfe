@@ -68,9 +68,22 @@ export interface Database {
       >;
       orders: Table<
         Order,
-        Omit<Order, "id" | "public_token" | "order_number" | "created_at" | "updated_at"> & {
+        Omit<
+          Order,
+          | "id"
+          | "public_token"
+          | "order_number"
+          | "created_at"
+          | "updated_at"
+          | "payment_reference"
+          | "paid_at"
+          | "ip_hash"
+        > & {
           id?: string;
           public_token?: string;
+          payment_reference?: string | null;
+          paid_at?: string | null;
+          ip_hash?: string | null;
         },
         Partial<Omit<Order, "id" | "public_token" | "order_number">>
       >;

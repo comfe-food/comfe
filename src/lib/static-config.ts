@@ -34,8 +34,6 @@ export interface StaticConfig {
     allergenNotice: string;
   };
   design: {
-    cream: string;
-    indigo: string;
     fontDisplay: string;
     fontBody: string;
     minTapTarget: number;

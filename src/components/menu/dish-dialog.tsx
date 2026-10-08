@@ -58,13 +58,13 @@ export function DishDialog({ presets }: { presets: NotePreset[] }) {
         type="button"
         aria-label={t("close")}
         onClick={closeDish}
-        className="absolute inset-0 bg-indigo-deep/60 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-ink/50"
         tabIndex={-1}
       />
       <div
         ref={dialogRef}
         tabIndex={-1}
-        className="animate-pop-in relative z-10 max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-cream shadow-2xl outline-none sm:rounded-3xl"
+        className="relative z-10 max-h-[92vh] w-full max-w-lg overflow-y-auto border border-line bg-surface outline-none"
       >
         <DishForm key={activeDish.id} dish={activeDish} presets={presets} onClose={closeDish} />
       </div>
@@ -195,7 +195,7 @@ function DishForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-cream-dark">
+      <div className="relative aspect-[16/10] w-full overflow-hidden bg-line">
         {dish.image_url ? (
           <Image
             src={dish.image_url}
@@ -207,7 +207,7 @@ function DishForm({
           />
         ) : (
           <div className="flex h-full items-center justify-center">
-            <span className="font-display text-4xl text-indigo/40" aria-hidden="true">
+            <span className="font-display text-4xl text-ink-muted" aria-hidden="true">
               Comfe
             </span>
           </div>
@@ -215,7 +215,7 @@ function DishForm({
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-3 right-3 flex h-11 w-11 items-center justify-center rounded-full bg-cream text-xl font-bold text-indigo shadow"
+          className="absolute top-3 right-3 flex h-11 w-11 items-center justify-center rounded-base border border-line bg-surface text-xl font-bold text-ink"
           aria-label={t("close")}
         >
           ×
@@ -230,18 +230,18 @@ function DishForm({
           <p className="mt-1 flex items-center gap-3 text-lg font-bold">
             {formatEuro(dish.price)}
             {dish.is_sold_out && (
-              <span className="chip bg-danger-soft text-danger">{t("soldOut")}</span>
+              <span className="label border-danger/40 bg-danger-soft text-danger">{t("soldOut")}</span>
             )}
           </p>
           {dish.description && (
-            <p className="mt-2 text-sm leading-relaxed text-indigo-light">
+            <p className="mt-2 text-sm leading-relaxed text-ink-muted">
               {dish.description}
             </p>
           )}
         </header>
 
         <section aria-labelledby="allergens-heading">
-          <h3 id="allergens-heading" className="mb-2 text-xs font-bold tracking-wide uppercase">
+          <h3 id="allergens-heading" className="mb-2 font-sans text-xs font-bold uppercase tracking-wide text-ink-muted">
             Alergénios
           </h3>
           <AllergenList codes={dish.allergens} />
@@ -258,7 +258,7 @@ function DishForm({
                 <h3 id={labelId} className="text-sm font-bold">
                   {group.name}
                 </h3>
-                <span className="text-2xs font-semibold text-indigo-light">
+                <span className="text-2xs font-semibold text-ink-muted">
                   {group.is_required || group.min_select > 0
                     ? t("required")
                     : t("optional")}
@@ -285,10 +285,10 @@ function DishForm({
                         aria-checked={isChosen}
                         disabled={disabled}
                         onClick={() => toggleOption(group.id, opt.id, group.max_select)}
-                        className={`flex min-h-[48px] items-center justify-between rounded-xl border-2 px-4 py-2.5 text-left text-sm font-semibold transition ${
+                        className={`flex min-h-[48px] items-center justify-between rounded-base border px-4 py-2.5 text-left text-sm font-semibold transition ${
                           isChosen
-                            ? "border-indigo bg-indigo text-cream"
-                            : "border-cream-dark bg-cream-soft text-indigo disabled:opacity-40"
+                            ? "border-accent bg-accent text-paper"
+                            : "border-line bg-surface text-ink disabled:opacity-40"
                         }`}
                       >
                         <span>{opt.name}</span>
@@ -309,7 +309,7 @@ function DishForm({
         <section aria-labelledby="notes-heading">
           <label htmlFor="dish-notes" className="field-label">
             <span id="notes-heading">{t("notes")}</span>
-            <span className="ml-1 font-normal text-indigo-light">
+            <span className="ml-1 font-normal text-ink-muted">
               ({t("optional")})
             </span>
           </label>
@@ -330,14 +330,14 @@ function DishForm({
                   <button
                     key={p.id}
                     type="button"
-                    className="chip min-h-[36px] hover:bg-cream-deep"
+                    className="min-h-[36px] rounded-base border border-line bg-surface px-2 py-1 text-xs font-semibold hover:border-ink"
                     onClick={() => appendNote(p.label)}
                   >
                     {p.label}
                   </button>
                 ))}
             </div>
-            <span className="shrink-0 text-2xs text-indigo-light" aria-live="polite">
+            <span className="shrink-0 text-2xs text-ink-muted" aria-live="polite">
               {(notes ?? "").length}/{MAX_NOTES}
             </span>
           </div>
@@ -409,7 +409,7 @@ function Stepper({
       type="button"
       aria-label={label}
       onClick={onClick}
-      className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-indigo text-xl font-bold text-indigo hover:bg-indigo-soft"
+      className="flex h-11 w-11 items-center justify-center rounded-base border border-line text-xl font-bold text-ink hover:border-ink"
     >
       {symbol}
     </button>

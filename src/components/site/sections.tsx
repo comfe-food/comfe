@@ -8,11 +8,11 @@ export function StorySection({ settings }: { settings: SiteSettingsMap }) {
       aria-labelledby="story-heading"
       className="mx-auto max-w-3xl px-4 py-10"
     >
-      <div className="card bg-indigo p-6 text-cream sm:p-8">
-        <h2 id="story-heading" className="text-2xl text-cream">
+      <div className="border-t-2 border-accent pt-6">
+        <h2 id="story-heading" className="text-2xl">
           {settings.story_title}
         </h2>
-        <div className="mt-4 space-y-4 text-sm leading-relaxed text-cream/90 sm:text-base">
+        <div className="mt-4 max-w-2xl space-y-4 text-sm leading-relaxed sm:text-base">
           {settings.story_text.split("\n").filter(Boolean).map((paragraph, i) => (
             <p key={i}>{paragraph}</p>
           ))}
@@ -35,33 +35,32 @@ export function HowItWorks({ settings }: { settings: SiteSettingsMap }) {
       <h2 id="how-heading" className="section-title">
         {t("howItWorks")}
       </h2>
-      <ol className="grid gap-3 sm:grid-cols-3">
+
+      <ol className="border-t-2 border-accent">
         {steps.map((step) => (
-          <li key={step.number} className="card p-5">
-            <span
-              aria-hidden="true"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo font-display text-lg text-cream"
-            >
+          <li
+            key={step.number}
+            className="grid grid-cols-[2rem_1fr] gap-x-3 border-b border-line py-4"
+          >
+            <span className="font-display text-base text-accent" aria-hidden="true">
               {step.number}
             </span>
-            <h3 className="mt-3 text-lg">{step.title}</h3>
-            <p className="mt-1 text-sm text-indigo-light">{step.text}</p>
+            <div>
+              <h3 className="text-base">{step.title}</h3>
+              <p className="mt-1 text-sm text-ink-muted">{step.text}</p>
+            </div>
           </li>
         ))}
       </ol>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <p className="card flex items-center gap-3 p-5 text-sm font-semibold">
-          <span aria-hidden="true" className="text-2xl">🕘</span>
+      <div className="mt-5 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
+        <p className="font-semibold">
           Todos os dias, das {hours.open} às {hours.close}
         </p>
-        <p className="card flex items-center gap-3 p-5 text-sm font-semibold">
-          <span aria-hidden="true" className="text-2xl">🚶</span>
-          {settings.pickup_only_notice}
-        </p>
+        <p className="font-semibold">{settings.pickup_only_notice}</p>
       </div>
 
-      <p className="mt-3 text-xs text-indigo-light">
+      <p className="mt-3 text-xs text-ink-muted">
         Dias de pedidos:{" "}
         {hours.days.length === 7
           ? "todos os dias"

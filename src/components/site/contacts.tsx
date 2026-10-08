@@ -14,7 +14,7 @@ export function ContactsSection({ settings }: { settings: SiteSettingsMap }) {
         {t("contacts")}
       </h2>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="max-w-xs space-y-3">
         {whatsapp && (
           <a
             href={`https://wa.me/${whatsapp}`}
@@ -22,13 +22,14 @@ export function ContactsSection({ settings }: { settings: SiteSettingsMap }) {
             rel="noopener noreferrer"
             className="btn btn-primary w-full"
           >
-            <span aria-hidden="true">💬</span>
             {t("whatsapp")}
           </a>
         )}
 
-        <a href={`tel:+351${settings.phone}`} className="btn btn-secondary w-full">
-          <span aria-hidden="true">📞</span>
+        <a
+          href={`tel:+351${settings.phone}`}
+          className="block text-sm font-semibold underline underline-offset-4"
+        >
           {t("call")} {settings.phone}
         </a>
 
@@ -37,15 +38,14 @@ export function ContactsSection({ settings }: { settings: SiteSettingsMap }) {
             href={instagram}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn btn-secondary w-full sm:col-span-2"
+            className="block text-sm font-semibold underline underline-offset-4"
           >
-            <span aria-hidden="true">📸</span>
             Instagram
           </a>
         )}
       </div>
 
-      <p className="mt-4 text-sm text-indigo-light">
+      <p className="mt-4 text-sm text-ink-muted">
         {t("pickupOnly")} {t("payMbWay")}.
       </p>
     </section>

@@ -8,10 +8,10 @@ export default function Loading() {
       aria-busy="true"
       aria-live="polite"
     >
-      <p className="text-sm font-semibold text-indigo-light">{t("loading")}</p>
+      <p className="text-sm font-semibold text-ink-muted">{t("loading")}</p>
       <div className="mt-4 space-y-3">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="card h-28 animate-pulse bg-cream-dark/60" />
+          <div key={i} className="h-24 animate-pulse border border-line bg-surface" />
         ))}
       </div>
     </main>

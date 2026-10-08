@@ -88,6 +88,7 @@ export type Order = {
   payment_method: string;
   payment_reference: string | null;
   paid_at: string | null;
+  ip_hash: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -123,6 +124,18 @@ export type SiteSetting = {
   value: unknown;
   description: string | null;
   updated_at: string;
+}
+
+/**
+ * Estado devolvido pelas server actions dos formulários do painel
+ * (`useActionState`). `done` marca o envio bem-sucedido para o cliente
+ * poder fechar o formulário.
+ */
+export type FormState = {
+  ok: boolean;
+  error?: string;
+  message?: string;
+  done?: boolean;
 }
 
 export type OpeningHours = {

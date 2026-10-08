@@ -18,23 +18,15 @@ export function OpenStatus({ accepting_orders, opening_hours }: Props) {
     return () => window.clearInterval(id);
   }, [accepting_orders, opening_hours]);
 
-  if (open === null) {
-    return <span className="chip opacity-70" aria-hidden="true">·</span>;
-  }
+  if (open === null) return null;
 
   return (
     <span
-      className={`chip min-h-[32px] ${
-        open ? "bg-success-soft text-success" : "bg-cream/20 text-cream"
+      className={`text-2xs font-bold uppercase tracking-wide ${
+        open ? "text-success-soft" : "text-paper/80"
       }`}
       role="status"
     >
-      <span
-        aria-hidden="true"
-        className={`inline-block h-2 w-2 rounded-full ${
-          open ? "bg-success" : "bg-cream/60"
-        }`}
-      />
       {open ? t("openNow") : t("closedNow")}
     </span>
   );

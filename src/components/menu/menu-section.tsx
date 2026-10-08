@@ -9,9 +9,9 @@ export function MenuSection({ menu }: { menu: MenuData }) {
         <h2 id="menu-heading" className="section-title">
           {t("menu")}
         </h2>
-        <div className="card p-6 text-center">
+        <div className="border-t border-line pt-3">
           <p className="font-bold">{t("emptyMenu")}</p>
-          <p className="mt-1 text-sm text-indigo-light">{t("emptyMenuHint")}</p>
+          <p className="mt-1 text-sm text-ink-muted">{t("emptyMenuHint")}</p>
         </div>
       </section>
     );
@@ -26,13 +26,13 @@ export function MenuSection({ menu }: { menu: MenuData }) {
       {menu.categories.length > 1 && (
         <nav
           aria-label="Categorias do menu"
-          className="scrollbar-thin -mx-1 mb-4 flex gap-2 overflow-x-auto px-1 pb-1"
+          className="scrollbar-thin mb-4 flex gap-4 overflow-x-auto pb-1"
         >
           {menu.categories.map((cat) => (
             <a
               key={cat.id}
               href={`#cat-${cat.id}`}
-              className="chip shrink-0 border border-cream-deep hover:bg-cream-deep"
+              className="shrink-0 text-sm font-semibold underline underline-offset-4 hover:text-accent"
             >
               {cat.name}
             </a>
@@ -43,7 +43,7 @@ export function MenuSection({ menu }: { menu: MenuData }) {
       <div className="space-y-8">
         {menu.categories.map((cat) => (
           <div key={cat.id} id={`cat-${cat.id}`} className="scroll-mt-24">
-            <h3 className="mb-3 text-lg text-indigo-light">{cat.name}</h3>
+            <h3 className="mb-3 text-lg text-accent">{cat.name}</h3>
             <div className="space-y-3">
               {cat.dishes.map((dish) => (
                 <DishCard key={dish.id} dish={dish} />
