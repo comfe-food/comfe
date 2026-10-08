@@ -1,11 +1,16 @@
 import "server-only";
 
 import { createSessionClient } from "@/lib/supabase/server";
-import type { Category, Dish } from "@/lib/types";
+import type { Category, Dish, Option, OptionGroup } from "@/lib/types";
+
+export interface AdminOptionGroup extends OptionGroup {
+  options: Option[];
+}
 
 export interface AdminMenuData {
   categories: Category[];
   dishes: Dish[];
+  optionGroups: AdminOptionGroup[];
 }
 
 /**
@@ -14,23 +19,48 @@ export interface AdminMenuData {
  */
 export async function getAdminMenu(): Promise<AdminMenuData> {
   const supabase = await createSessionClient();
-  if (!supabase) return { categories: [], dishes: [] };
+  if (!supabase) return { categories: [], dishes: [], optionGroups: [] };
 
-  const [categoriesRes, dishesRes] = await Promise.all([
+  const [categoriesRes, dishesRes, groupsRes, optionsRes] = await Promise.all([
     supabase.from("categories").select("*").order("sort_order").order("name"),
     supabase.from("dishes").select("*").order("sort_order").order("name"),
+    supabase.from("option_groups").select("*").order("sort_order"),
+    supabase.from("options").select("*").order("sort_order"),
   ]);
 
-  if (categoriesRes.error || dishesRes.error) {
+  if (
+    categoriesRes.error ||
+    dishesRes.error ||
+    groupsRes.error ||
+    optionsRes.error
+  ) {
     console.error(
       "[comfe]Erro a ler o menu do painel:",
-      categoriesRes.error?.message ?? dishesRes.error?.message,
+      categoriesRes.error?.message ??
+        dishesRes.error?.message ??
+        groupsRes.error?.message ??
+        optionsRes.error?.message,
     );
-    return { categories: [], dishes: [] };
+    return { categories: [], dishes: [], optionGroups: [] };
   }
+
+  const optionsByGroup = new Map<string, Option[]>();
+  for (const opt of optionsRes.data ?? []) {
+    const list = optionsByGroup.get(opt.group_id) ?? [];
+    list.push(opt);
+    optionsByGroup.set(opt.group_id, list);
+  }
+
+  const optionGroups: AdminOptionGroup[] = (groupsRes.data ?? []).map(
+    (group) => ({
+      ...group,
+      options: optionsByGroup.get(group.id) ?? [],
+    }),
+  );
 
   return {
     categories: (categoriesRes.data ?? []) as Category[],
     dishes: (dishesRes.data ?? []) as Dish[],
+    optionGroups,
   };
 }

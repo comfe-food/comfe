@@ -8,7 +8,12 @@ import type { ActionResult } from "@/app/admin/actions";
 import { getServiceClient } from "@/lib/supabase/admin";
 import { createSessionClient, requireAdmin } from "@/lib/supabase/server";
 import type { FormState } from "@/lib/types";
-import { categorySchema, dishSchema } from "@/lib/validation/admin";
+import {
+  categorySchema,
+  dishSchema,
+  optionGroupSchema,
+  optionSchema,
+} from "@/lib/validation/admin";
 
 const IMAGE_TYPES: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -209,6 +214,110 @@ export async function deleteDish(id: string): Promise<ActionResult> {
   if (!supabase) return { ok: false, error: "Base de dados não configurada." };
 
   const { error } = await supabase.from("dishes").delete().eq("id", id);
+  const dbError = firstError(error);
+  if (dbError) return { ok: false, error: dbError };
+
+  updateTag("menu");
+  revalidatePath("/admin/menu");
+  return { ok: true };
+}
+
+/** Cria ou atualiza um grupo de opções (ex.: "Acompanhamento") de um prato. */
+export async function saveOptionGroup(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const supabase = await requireSession();
+  if (!supabase) return { ok: false, error: "Base de dados não configurada." };
+
+  const idRaw = String(formData.get("id") ?? "");
+  const parsed = optionGroupSchema.safeParse({
+    id: idRaw || undefined,
+    dish_id: formData.get("dish_id"),
+    name: formData.get("name"),
+    is_required: formData.get("is_required") === "on",
+    min_select: formData.get("min_select") ?? 0,
+    max_select: formData.get("max_select") ?? 1,
+    sort_order: formData.get("sort_order") ?? 0,
+  });
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    return {
+      ok: false,
+      error: issue ? `${issue.path.join(".")}: ${issue.message}` : "Dados inválidos.",
+    };
+  }
+
+  const { id, dish_id, ...values } = parsed.data;
+  const { error } = id
+    ? await supabase.from("option_groups").update(values).eq("id", id)
+    : await supabase.from("option_groups").insert({ ...values, dish_id });
+  const dbError = firstError(error);
+  if (dbError) return { ok: false, error: dbError };
+
+  updateTag("menu");
+  revalidatePath("/admin/menu");
+  return { ok: true, message: "Grupo guardado.", done: true };
+}
+
+/** Remove um grupo de opções (as opções são apagadas em cascata). */
+export async function deleteOptionGroup(id: string): Promise<ActionResult> {
+  const supabase = await requireSession();
+  if (!supabase) return { ok: false, error: "Base de dados não configurada." };
+
+  const { error } = await supabase.from("option_groups").delete().eq("id", id);
+  const dbError = firstError(error);
+  if (dbError) return { ok: false, error: dbError };
+
+  updateTag("menu");
+  revalidatePath("/admin/menu");
+  return { ok: true };
+}
+
+/** Cria ou atualiza uma opção dentro de um grupo. */
+export async function saveOption(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const supabase = await requireSession();
+  if (!supabase) return { ok: false, error: "Base de dados não configurada." };
+
+  const idRaw = String(formData.get("id") ?? "");
+  const parsed = optionSchema.safeParse({
+    id: idRaw || undefined,
+    group_id: formData.get("group_id"),
+    name: formData.get("name"),
+    extra_price: formData.get("extra_price") ?? 0,
+    is_active: formData.get("is_active") === "on",
+    sort_order: formData.get("sort_order") ?? 0,
+  });
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    return {
+      ok: false,
+      error: issue ? `${issue.path.join(".")}: ${issue.message}` : "Dados inválidos.",
+    };
+  }
+
+  const { id, group_id, ...values } = parsed.data;
+  const payload = { ...values, extra_price: values.extra_price.toFixed(2) };
+  const { error } = id
+    ? await supabase.from("options").update(payload).eq("id", id)
+    : await supabase.from("options").insert({ ...payload, group_id });
+  const dbError = firstError(error);
+  if (dbError) return { ok: false, error: dbError };
+
+  updateTag("menu");
+  revalidatePath("/admin/menu");
+  return { ok: true, message: "Opção guardada.", done: true };
+}
+
+/** Remove uma opção do grupo. */
+export async function deleteOption(id: string): Promise<ActionResult> {
+  const supabase = await requireSession();
+  if (!supabase) return { ok: false, error: "Base de dados não configurada." };
+
+  const { error } = await supabase.from("options").delete().eq("id", id);
   const dbError = firstError(error);
   if (dbError) return { ok: false, error: dbError };
 

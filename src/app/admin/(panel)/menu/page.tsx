@@ -7,6 +7,12 @@ export const metadata = {
 };
 
 export default async function AdminMenuPage() {
-  const { categories, dishes } = await getAdminMenu();
-  return <MenuEditor categories={categories} dishes={dishes} />;
+  const { categories, dishes, optionGroups } = await getAdminMenu();
+  return (
+    <MenuEditor
+      categories={categories}
+      dishes={dishes}
+      optionGroups={optionGroups}
+    />
+  );
 }

@@ -98,3 +98,52 @@ export const dishSchema = z.object({
 });
 
 export type DishInput = z.infer<typeof dishSchema>;
+
+/** Grupo de opções do prato (ex.: "Acompanhamento"). */
+export const optionGroupSchema = z
+  .object({
+    id: z.uuid().optional(),
+    dish_id: z.uuid({ message: "Prato inválido" }),
+    name: z.string().trim().min(1, "Indica o nome do grupo").max(60),
+    is_required: z.boolean().default(false),
+    min_select: z.coerce
+      .number({ message: "Usa um número inteiro" })
+      .int("Usa um número inteiro")
+      .min(0, "Mínimo inválido")
+      .max(20, "Mínimo demasiado alto"),
+    max_select: z.coerce
+      .number({ message: "Usa um número inteiro" })
+      .int("Usa um número inteiro")
+      .min(1, "Máximo inválido")
+      .max(20, "Máximo demasiado alto"),
+    sort_order: z.coerce
+      .number()
+      .int("Usa um número inteiro")
+      .min(0)
+      .max(999),
+  })
+  .refine((g) => g.min_select <= g.max_select, {
+    message: "O mínimo não pode exceder o máximo",
+    path: ["min_select"],
+  });
+
+export type OptionGroupInput = z.infer<typeof optionGroupSchema>;
+
+/** Opção dentro de um grupo (ex.: "Batata frita" +0,50 €). */
+export const optionSchema = z.object({
+  id: z.uuid().optional(),
+  group_id: z.uuid({ message: "Grupo inválido" }),
+  name: z.string().trim().min(1, "Indica o nome da opção").max(60),
+  extra_price: z.coerce
+    .number({ message: "Preço inválido" })
+    .min(0, "Preço inválido")
+    .max(999, "Preço demasiado alto"),
+  is_active: z.boolean().default(true),
+  sort_order: z.coerce
+    .number()
+    .int("Usa um número inteiro")
+    .min(0)
+    .max(999),
+});
+
+export type OptionInput = z.infer<typeof optionSchema>;

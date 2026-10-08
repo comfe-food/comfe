@@ -222,7 +222,7 @@ function DishForm({
         </button>
       </div>
 
-      <div className="space-y-5 px-5 pt-4 pb-6 sm:px-6">
+      <div className="space-y-5 px-5 pt-4 pb-5 sm:px-6">
         <header>
           <h2 id="dish-dialog-title" className="text-2xl">
             {dish.name}
@@ -343,6 +343,9 @@ function DishForm({
           </div>
         </section>
 
+      </div>
+
+      <div className="sticky bottom-0 border-t border-line bg-surface px-5 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:px-6">
         <div className="flex items-end justify-between gap-4">
           <div>
             <label htmlFor="dish-quantity" className="field-label">
@@ -385,7 +388,7 @@ function DishForm({
 
         <button
           type="submit"
-          className="btn btn-primary w-full"
+          className="btn btn-primary mt-3 w-full"
           disabled={dish.is_sold_out || !dish.is_active}
         >
           {dish.is_sold_out ? t("soldOut") : t("addToOrder")}

@@ -11,15 +11,19 @@ import {
 } from "@/app/admin/menu-actions";
 import { CategoryForm } from "@/components/admin/category-form";
 import { DishForm } from "@/components/admin/dish-form";
+import { OptionGroupsEditor } from "@/components/admin/option-groups-editor";
 import { formatEuro } from "@/lib/format";
+import type { AdminOptionGroup } from "@/lib/data/admin-menu";
 import type { Category, Dish } from "@/lib/types";
 
 export function MenuEditor({
   categories,
   dishes,
+  optionGroups,
 }: {
   categories: Category[];
   dishes: Dish[];
+  optionGroups: AdminOptionGroup[];
 }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -27,6 +31,7 @@ export function MenuEditor({
   const [editingCategory, setEditingCategory] = useState<string | "new" | null>(
     null,
   );
+  const [editingOptions, setEditingOptions] = useState<Dish | null>(null);
 
   async function run(action: Promise<ActionResult>) {
     const result = await action;
@@ -35,6 +40,9 @@ export function MenuEditor({
   }
 
   const uncategorized = dishes.filter((dish) => !dish.category_id);
+  const optionsDish =
+    editingOptions ??
+    (editingDish && editingDish !== "new" ? editingDish : null);
 
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 space-y-6 px-4 py-6">
@@ -46,6 +54,7 @@ export function MenuEditor({
             onClick={() => {
               setEditingCategory("new");
               setEditingDish(null);
+              setEditingOptions(null);
             }}
             className="btn btn-secondary"
           >
@@ -56,6 +65,7 @@ export function MenuEditor({
             onClick={() => {
               setEditingDish("new");
               setEditingCategory(null);
+              setEditingOptions(null);
             }}
             className="btn btn-primary"
           >
@@ -79,6 +89,14 @@ export function MenuEditor({
           dish={editingDish === "new" ? undefined : editingDish}
           categories={categories}
           onDone={() => setEditingDish(null)}
+        />
+      )}
+
+      {optionsDish && (
+        <OptionGroupsEditor
+          key={`options-${optionsDish.id}`}
+          dish={optionsDish}
+          groups={optionGroups.filter((g) => g.dish_id === optionsDish.id)}
         />
       )}
 
@@ -168,6 +186,12 @@ export function MenuEditor({
                       onEdit={() => {
                         setEditingDish(dish);
                         setEditingCategory(null);
+                        setEditingOptions(null);
+                      }}
+                      onOptions={() => {
+                        setEditingOptions(dish);
+                        setEditingDish(null);
+                        setEditingCategory(null);
                       }}
                       onToggle={() =>
                         run(
@@ -204,6 +228,12 @@ export function MenuEditor({
                   onEdit={() => {
                     setEditingDish(dish);
                     setEditingCategory(null);
+                    setEditingOptions(null);
+                  }}
+                  onOptions={() => {
+                    setEditingOptions(dish);
+                    setEditingDish(null);
+                    setEditingCategory(null);
                   }}
                   onToggle={() =>
                     run(
@@ -232,12 +262,14 @@ export function MenuEditor({
 function DishRow({
   dish,
   onEdit,
+  onOptions,
   onToggle,
   onSoldOut,
   onDelete,
 }: {
   dish: Dish;
   onEdit: () => void;
+  onOptions: () => void;
   onToggle: () => void;
   onSoldOut: () => void;
   onDelete: () => void;
@@ -272,6 +304,13 @@ function DishRow({
           className="font-semibold underline underline-offset-4"
         >
           Editar
+        </button>
+        <button
+          type="button"
+          onClick={onOptions}
+          className="font-semibold underline underline-offset-4"
+        >
+          Acompanhamentos
         </button>
         <button
           type="button"
