@@ -3,18 +3,17 @@
 import Image from "next/image";
 import { useActionState, useEffect, useState } from "react";
 import { saveDish } from "@/app/admin/menu-actions";
-import { getStaticConfig } from "@/lib/static-config";
-import type { Category, Dish, FormState } from "@/lib/types";
-
-const ALLERGENS = getStaticConfig().allergens;
+import type { Allergen, Category, Dish, FormState } from "@/lib/types";
 
 export function DishForm({
   dish,
   categories,
+  allergens,
   onDone,
 }: {
   dish?: Dish;
   categories: Category[];
+  allergens: Allergen[];
   onDone: () => void;
 }) {
   const [state, action, pending] = useActionState<FormState, FormData>(
@@ -156,7 +155,7 @@ export function DishForm({
       <fieldset>
         <legend className="field-label">Alergénios</legend>
         <div className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
-          {ALLERGENS.map((allergen) => (
+          {allergens.map((allergen) => (
             <label
               key={allergen.code}
               className="flex items-center gap-2 text-sm"
@@ -168,7 +167,7 @@ export function DishForm({
                 defaultChecked={dish?.allergens.includes(allergen.code)}
                 className="h-4 w-4 accent-accent"
               />
-              {allergen.name}
+              {allergen.name_pt}
             </label>
           ))}
         </div>

@@ -3,12 +3,23 @@
 import Image from "next/image";
 import { formatEuro } from "@/lib/format";
 import type { MenuDish } from "@/lib/data/menu";
-import { getAllergenNames, t } from "@/lib/static-config";
+import type { Allergen } from "@/lib/types";
+import { t } from "@/lib/static-config";
 import { useMenuUi } from "@/components/menu/menu-context";
 
-export function DishCard({ dish }: { dish: MenuDish }) {
+export function DishCard({
+  dish,
+  allergens,
+}: {
+  dish: MenuDish;
+  allergens: Allergen[];
+}) {
   const { openDish } = useMenuUi();
   const disabled = dish.is_sold_out || !dish.is_active;
+
+  const names = dish.allergens.map(
+    (code) => allergens.find((a) => a.code === code)?.name_pt ?? code,
+  );
 
   return (
     <article
@@ -52,8 +63,8 @@ export function DishCard({ dish }: { dish: MenuDish }) {
             {dish.allergens.length > 0 && (
               <span
                 className="label"
-                title={getAllergenNames(dish.allergens).join(", ")}
-                aria-label={`Alergénios: ${getAllergenNames(dish.allergens).join(", ")}`}
+                title={names.join(", ")}
+                aria-label={`Alergénios: ${names.join(", ")}`}
               >
                 Alergénios
               </span>

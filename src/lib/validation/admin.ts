@@ -85,7 +85,7 @@ export const dishSchema = z.object({
     .max(999, "Preço demasiado alto"),
   category_id: z.uuid().nullable(),
   image_url: z.string().trim().max(600).default(""),
-  allergens: z.array(z.string().max(40)).max(14).default([]),
+  allergens: z.array(z.string().max(40)).max(60).default([]),
   is_active: z.boolean().default(true),
   is_sold_out: z.boolean().default(false),
   sort_order: z.coerce
@@ -147,3 +147,20 @@ export const optionSchema = z.object({
 });
 
 export type OptionInput = z.infer<typeof optionSchema>;
+
+/** Alergénio (lista de referência da BD). */
+export const allergenSchema = z.object({
+  code: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .regex(/^[a-z0-9-]{2,40}$/, "Código inválido (só letras, números e hífen)"),
+  name_pt: z.string().trim().min(2, "Indica o nome").max(60),
+  sort_order: z.coerce
+    .number()
+    .int("Usa um número inteiro")
+    .min(0)
+    .max(999),
+});
+
+export type AllergenInput = z.infer<typeof allergenSchema>;

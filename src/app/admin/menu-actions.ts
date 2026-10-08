@@ -9,6 +9,7 @@ import { getServiceClient } from "@/lib/supabase/admin";
 import { createSessionClient, requireAdmin } from "@/lib/supabase/server";
 import type { FormState } from "@/lib/types";
 import {
+  allergenSchema,
   categorySchema,
   dishSchema,
   optionGroupSchema,
@@ -318,6 +319,93 @@ export async function deleteOption(id: string): Promise<ActionResult> {
   if (!supabase) return { ok: false, error: "Base de dados não configurada." };
 
   const { error } = await supabase.from("options").delete().eq("id", id);
+  const dbError = firstError(error);
+  if (dbError) return { ok: false, error: dbError };
+
+  updateTag("menu");
+  revalidatePath("/admin/menu");
+  return { ok: true };
+}
+
+/** Cria ou atualiza um alergénio da lista de referência. */
+export async function saveAllergen(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const supabase = await requireSession();
+  if (!supabase) return { ok: false, error: "Base de dados não configurada." };
+
+  const originalCode = String(formData.get("original_code") ?? "");
+  const parsed = allergenSchema.safeParse({
+    code: formData.get("code"),
+    name_pt: formData.get("name_pt"),
+    sort_order: formData.get("sort_order") ?? 0,
+  });
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    return {
+      ok: false,
+      error: issue ? `${issue.path.join(".")}: ${issue.message}` : "Dados inválidos.",
+    };
+  }
+
+  const { code, name_pt, sort_order } = parsed.data;
+
+  // Código alterado: os pratos guardam o código antigo em `allergens`.
+  if (originalCode && originalCode !== code) {
+    const { data: dishes, error: readError } = await supabase
+      .from("dishes")
+      .select("id, allergens")
+      .contains("allergens", [originalCode]);
+    if (readError) return { ok: false, error: readError.message };
+
+    for (const dish of dishes ?? []) {
+      const updated = dish.allergens.map((c) => (c === originalCode ? code : c));
+      const { error } = await supabase
+        .from("dishes")
+        .update({ allergens: updated })
+        .eq("id", dish.id);
+      if (error) return { ok: false, error: error.message };
+    }
+
+    const { error: delError } = await supabase
+      .from("allergens")
+      .delete()
+      .eq("code", originalCode);
+    if (delError) return { ok: false, error: delError.message };
+  }
+
+  const { error } = await supabase.from("allergens").upsert({
+    code,
+    name_pt,
+    sort_order,
+  });
+  const dbError = firstError(error);
+  if (dbError) return { ok: false, error: dbError };
+
+  updateTag("menu");
+  revalidatePath("/admin/menu");
+  return { ok: true, message: "Alergénio guardado.", done: true };
+}
+
+/** Remove um alergénio (bloqueado se algum prato o usa). */
+export async function deleteAllergen(code: string): Promise<ActionResult> {
+  const supabase = await requireSession();
+  if (!supabase) return { ok: false, error: "Base de dados não configurada." };
+
+  const { data: dishes, error: readError } = await supabase
+    .from("dishes")
+    .select("id")
+    .contains("allergens", [code]);
+  if (readError) return { ok: false, error: readError.message };
+  if (dishes && dishes.length > 0) {
+    return {
+      ok: false,
+      error: `Em uso por ${dishes.length} prato(s) — desmarca primeiro.`,
+    };
+  }
+
+  const { error } = await supabase.from("allergens").delete().eq("code", code);
   const dbError = firstError(error);
   if (dbError) return { ok: false, error: dbError };
 

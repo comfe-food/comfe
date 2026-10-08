@@ -109,7 +109,7 @@ export default async function HomePage() {
           <ContactsSection settings={settings} />
 
           <CartBar />
-          <DishDialog presets={presets} />
+          <DishDialog presets={presets} allergens={menu.allergens} />
         </main>
 
         <SiteFooter settings={settings} />

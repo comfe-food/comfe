@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { formatEuro } from "@/lib/format";
 import type { MenuDish } from "@/lib/data/menu";
-import type { NotePreset } from "@/lib/types";
+import type { Allergen, NotePreset } from "@/lib/types";
 import { t } from "@/lib/static-config";
 import { useCart } from "@/components/cart/cart-context";
 import { useMenuUi } from "@/components/menu/menu-context";
@@ -20,7 +20,13 @@ interface FormValues {
 const MAX_NOTES = 140;
 const MAX_QUANTITY = 20;
 
-export function DishDialog({ presets }: { presets: NotePreset[] }) {
+export function DishDialog({
+  presets,
+  allergens,
+}: {
+  presets: NotePreset[];
+  allergens: Allergen[];
+}) {
   const { activeDish, closeDish } = useMenuUi();
   const dialogRef = useRef<HTMLDivElement>(null);
   const lastFocused = useRef<HTMLElement | null>(null);
@@ -66,7 +72,13 @@ export function DishDialog({ presets }: { presets: NotePreset[] }) {
         tabIndex={-1}
         className="relative z-10 max-h-[92vh] w-full max-w-lg overflow-y-auto border border-line bg-surface outline-none"
       >
-        <DishForm key={activeDish.id} dish={activeDish} presets={presets} onClose={closeDish} />
+        <DishForm
+          key={activeDish.id}
+          dish={activeDish}
+          presets={presets}
+          allergens={allergens}
+          onClose={closeDish}
+        />
       </div>
     </div>
   );
@@ -75,10 +87,12 @@ export function DishDialog({ presets }: { presets: NotePreset[] }) {
 function DishForm({
   dish,
   presets,
+  allergens,
   onClose,
 }: {
   dish: MenuDish;
   presets: NotePreset[];
+  allergens: Allergen[];
   onClose: () => void;
 }) {
   const { addItem } = useCart();
@@ -244,7 +258,7 @@ function DishForm({
           <h3 id="allergens-heading" className="mb-2 font-sans text-xs font-bold uppercase tracking-wide text-ink-muted">
             Alergénios
           </h3>
-          <AllergenList codes={dish.allergens} />
+          <AllergenList codes={dish.allergens} allergens={allergens} />
         </section>
 
         {dish.option_groups.map((group) => {

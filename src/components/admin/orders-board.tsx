@@ -9,6 +9,7 @@ import {
   type ActionResult,
 } from "@/app/admin/actions";
 import type { AdminOrder } from "@/lib/data/admin-orders";
+import { ActionMenu } from "@/components/admin/action-menu";
 import { formatEuro, formatTime } from "@/lib/format";
 import type { OrderStatus } from "@/lib/types";
 import { getBrowserClient } from "@/lib/supabase/client";
@@ -185,18 +186,34 @@ export function OrdersBoard({ initialOrders }: { initialOrders: AdminOrder[] }) 
               <OrderCard key={o.id} order={o} showTicker>
                 <button
                   type="button"
-                  className="btn btn-primary w-full"
+                  className="btn btn-primary w-full md:w-auto"
                   onClick={() => run(confirmManualPaymentAdmin(o.id))}
                 >
                   Marcar como pago
                 </button>
                 <button
                   type="button"
-                  className="text-sm font-semibold underline underline-offset-4 text-danger"
+                  className="hidden text-sm font-semibold underline underline-offset-4 text-danger md:inline-block"
                   onClick={() => run(cancelOrderAdmin(o.id))}
                 >
                   Cancelar pedido
                 </button>
+                <div className="md:hidden">
+                  <ActionMenu
+                    ariaLabel={`Ações do pedido nº ${o.orderNumber}`}
+                    items={[
+                      {
+                        label: "Marcar como pago",
+                        onClick: () => run(confirmManualPaymentAdmin(o.id)),
+                      },
+                      {
+                        label: "Cancelar pedido",
+                        danger: true,
+                        onClick: () => run(cancelOrderAdmin(o.id)),
+                      },
+                    ]}
+                  />
+                </div>
               </OrderCard>
             ))}
           </div>
@@ -246,24 +263,43 @@ function StatusActions({
   };
 
   const target = next[order.status];
+  const nextLabel = target ? label[order.status] : undefined;
+  const cancel = () => run(cancelOrderAdmin(order.id));
+
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       {target && (
         <button
           type="button"
-          className="btn btn-primary"
+          className="btn btn-primary flex-1 md:flex-none"
           onClick={() => run(setOrderStatus(order.id, target))}
         >
-          {label[order.status]}
+          {nextLabel}
         </button>
       )}
       <button
         type="button"
-        className="text-sm font-semibold underline underline-offset-4 text-danger"
-        onClick={() => run(cancelOrderAdmin(order.id))}
+        className="hidden text-sm font-semibold underline underline-offset-4 text-danger md:inline-block"
+        onClick={cancel}
       >
         Cancelar
       </button>
+      <div className="md:hidden">
+        <ActionMenu
+          ariaLabel={`Ações do pedido nº ${order.orderNumber}`}
+          items={[
+            ...(target && nextLabel
+              ? [
+                  {
+                    label: nextLabel,
+                    onClick: () => run(setOrderStatus(order.id, target)),
+                  },
+                ]
+              : []),
+            { label: "Cancelar", danger: true, onClick: cancel },
+          ]}
+        />
+      </div>
     </div>
   );
 }

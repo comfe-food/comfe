@@ -9,6 +9,7 @@ import {
   saveOption,
   saveOptionGroup,
 } from "@/app/admin/menu-actions";
+import { ActionMenu } from "@/components/admin/action-menu";
 import { formatEuro } from "@/lib/format";
 import type { Dish, FormState, Option } from "@/lib/types";
 import type { AdminOptionGroup } from "@/lib/data/admin-menu";
@@ -92,7 +93,7 @@ export function OptionGroupsEditor({
                   <span className="text-2xs text-ink-muted">
                     {group.min_select}–{group.max_select} · ordem {group.sort_order}
                   </span>
-                  <span className="ml-auto flex flex-wrap gap-3 text-sm">
+                  <span className="ml-auto hidden flex-wrap gap-3 text-sm md:flex">
                     <button
                       type="button"
                       className="font-semibold underline underline-offset-4"
@@ -115,6 +116,30 @@ export function OptionGroupsEditor({
                       Remover
                     </button>
                   </span>
+
+                  <div className="ml-auto md:hidden">
+                    <ActionMenu
+                      ariaLabel={`Ações do grupo ${group.name}`}
+                      items={[
+                        {
+                          label: "Editar",
+                          onClick: () => {
+                            setEditingGroup(group.id);
+                            setAddingOptionFor(null);
+                            setEditingOption(null);
+                          },
+                        },
+                        {
+                          label: "Remover",
+                          danger: true,
+                          onClick: () =>
+                            confirm(
+                              `Remover o grupo «${group.name}» e as suas opções?`,
+                            ) && run(deleteOptionGroup(group.id)),
+                        },
+                      ]}
+                    />
+                  </div>
                 </div>
               )}
 
@@ -140,7 +165,7 @@ export function OptionGroupsEditor({
                           : "sem acréscimo"}
                       </span>
                       {!opt.is_active && <span className="label">Desativada</span>}
-                      <span className="ml-auto flex flex-wrap gap-3">
+                      <span className="ml-auto hidden flex-wrap gap-3 md:flex">
                         <button
                           type="button"
                           className="font-semibold underline underline-offset-4"
@@ -163,6 +188,32 @@ export function OptionGroupsEditor({
                           Remover
                         </button>
                       </span>
+
+                      <div className="ml-auto md:hidden">
+                        <ActionMenu
+                          ariaLabel={`Ações da opção ${opt.name}`}
+                          items={[
+                            {
+                              label: "Editar",
+                              onClick: () => {
+                                setEditingOption({
+                                  id: opt.id,
+                                  groupId: group.id,
+                                });
+                                setEditingGroup(null);
+                                setAddingOptionFor(null);
+                              },
+                            },
+                            {
+                              label: "Remover",
+                              danger: true,
+                              onClick: () =>
+                                confirm(`Remover a opção «${opt.name}»?`) &&
+                                run(deleteOption(opt.id)),
+                            },
+                          ]}
+                        />
+                      </div>
                     </li>
                   ),
                 )}

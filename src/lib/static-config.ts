@@ -49,18 +49,6 @@ export function getStaticConfig(): StaticConfig {
   return cached;
 }
 
-const ALLERGEN_MAP = new Map<string, AllergenDef>(
-  getStaticConfig().allergens.map((a) => [a.code, a]),
-);
-
-export function getAllergenDef(code: string): AllergenDef | undefined {
-  return ALLERGEN_MAP.get(code);
-}
-
-export function getAllergenNames(codes: string[]): string[] {
-  return codes.map((c) => ALLERGEN_MAP.get(c)?.name ?? c);
-}
-
 export function t(key: string, vars?: Record<string, string | number>): string {
   let value = getStaticConfig().texts[key] ?? key;
   if (vars) {
@@ -70,7 +58,3 @@ export function t(key: string, vars?: Record<string, string | number>): string {
   }
   return value;
 }
-
-export const ALLERGEN_CODES: AllergenCode[] = getStaticConfig().allergens.map(
-  (a) => a.code,
-);

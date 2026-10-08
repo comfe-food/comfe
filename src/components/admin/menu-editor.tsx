@@ -9,21 +9,25 @@ import {
   deleteDish,
   setDishFlags,
 } from "@/app/admin/menu-actions";
+import { ActionMenu } from "@/components/admin/action-menu";
+import { AllergensEditor } from "@/components/admin/allergens-editor";
 import { CategoryForm } from "@/components/admin/category-form";
 import { DishForm } from "@/components/admin/dish-form";
 import { OptionGroupsEditor } from "@/components/admin/option-groups-editor";
 import { formatEuro } from "@/lib/format";
 import type { AdminOptionGroup } from "@/lib/data/admin-menu";
-import type { Category, Dish } from "@/lib/types";
+import type { Allergen, Category, Dish } from "@/lib/types";
 
 export function MenuEditor({
   categories,
   dishes,
   optionGroups,
+  allergens,
 }: {
   categories: Category[];
   dishes: Dish[];
   optionGroups: AdminOptionGroup[];
+  allergens: Allergen[];
 }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -88,6 +92,7 @@ export function MenuEditor({
           key={editingDish === "new" ? "new" : editingDish.id}
           dish={editingDish === "new" ? undefined : editingDish}
           categories={categories}
+          allergens={allergens}
           onDone={() => setEditingDish(null)}
         />
       )}
@@ -126,7 +131,7 @@ export function MenuEditor({
                   <span className="label">
                     {cat.is_active ? "Visível" : "Oculta"}
                   </span>
-                  <span className="ml-auto flex flex-wrap gap-3 text-sm">
+                  <span className="ml-auto hidden flex-wrap gap-3 text-sm md:flex">
                     <button
                       type="button"
                       onClick={() => {
@@ -148,6 +153,28 @@ export function MenuEditor({
                       Remover
                     </button>
                   </span>
+
+                  <div className="ml-auto md:hidden">
+                    <ActionMenu
+                      ariaLabel={`Ações da categoria ${cat.name}`}
+                      items={[
+                        {
+                          label: "Editar",
+                          onClick: () => {
+                            setEditingCategory(cat.id);
+                            setEditingDish(null);
+                          },
+                        },
+                        {
+                          label: "Remover",
+                          danger: true,
+                          onClick: () =>
+                            confirm(`Remover a categoria «${cat.name}»?`) &&
+                            run(deleteCategory(cat.id)),
+                        },
+                      ]}
+                    />
+                  </div>
                 </div>
               )}
             </li>
@@ -255,6 +282,8 @@ export function MenuEditor({
           </div>
         )}
       </section>
+
+      <AllergensEditor allergens={allergens} />
     </main>
   );
 }
@@ -297,7 +326,7 @@ function DishRow({
         </p>
       </div>
 
-      <span className="flex flex-wrap gap-3 text-sm">
+      <span className="ml-auto hidden flex-wrap gap-3 text-sm md:flex">
         <button
           type="button"
           onClick={onEdit}
@@ -334,6 +363,25 @@ function DishRow({
           Remover
         </button>
       </span>
+
+      <div className="ml-auto md:hidden">
+        <ActionMenu
+          ariaLabel={`Ações do prato ${dish.name}`}
+          items={[
+            { label: "Editar", onClick: onEdit },
+            { label: "Acompanhamentos", onClick: onOptions },
+            {
+              label: dish.is_active ? "Ocultar" : "Mostrar",
+              onClick: onToggle,
+            },
+            {
+              label: dish.is_sold_out ? "Repôr" : "Esgotar",
+              onClick: onSoldOut,
+            },
+            { label: "Remover", onClick: onDelete, danger: true },
+          ]}
+        />
+      </div>
     </li>
   );
 }

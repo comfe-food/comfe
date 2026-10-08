@@ -46,7 +46,7 @@ export function MenuSection({ menu }: { menu: MenuData }) {
             <h3 className="mb-3 text-lg text-accent">{cat.name}</h3>
             <div className="space-y-3">
               {cat.dishes.map((dish) => (
-                <DishCard key={dish.id} dish={dish} />
+                <DishCard key={dish.id} dish={dish} allergens={menu.allergens} />
               ))}
             </div>
           </div>

@@ -1,8 +1,16 @@
 import "server-only";
 
 import { cacheLife, cacheTag } from "next/cache";
-import type { Category, Dish, NotePreset, Option, OptionGroup } from "@/lib/types";
+import type {
+  Allergen,
+  Category,
+  Dish,
+  NotePreset,
+  Option,
+  OptionGroup,
+} from "@/lib/types";
 import { getPublicClient } from "@/lib/supabase/public";
+import { getStaticConfig } from "@/lib/static-config";
 
 export interface MenuOptionGroup extends OptionGroup {
   options: Option[];
@@ -22,6 +30,16 @@ export interface MenuCategoryGroup {
 export interface MenuData {
   categories: MenuCategoryGroup[];
   dishes: MenuDish[];
+  allergens: Allergen[];
+}
+
+/** Alergénios por omissão (static.json) quando a BD não responde. */
+function fallbackAllergens(): Allergen[] {
+  return getStaticConfig().allergens.map((a, i) => ({
+    code: a.code,
+    name_pt: a.name,
+    sort_order: i + 1,
+  }));
 }
 
 /**
@@ -34,14 +52,17 @@ export async function getMenu(): Promise<MenuData> {
   cacheLife("hours");
 
   const supabase = getPublicClient();
-  if (!supabase) return { categories: [], dishes: [] };
+  if (!supabase)
+    return { categories: [], dishes: [], allergens: fallbackAllergens() };
 
-  const [dishesRes, groupsRes, optionsRes, categoriesRes] = await Promise.all([
-    supabase.from("dishes").select("*"),
-    supabase.from("option_groups").select("*"),
-    supabase.from("options").select("*"),
-    supabase.from("categories").select("*").order("sort_order"),
-  ]);
+  const [dishesRes, groupsRes, optionsRes, categoriesRes, allergensRes] =
+    await Promise.all([
+      supabase.from("dishes").select("*"),
+      supabase.from("option_groups").select("*"),
+      supabase.from("options").select("*"),
+      supabase.from("categories").select("*").order("sort_order"),
+      supabase.from("allergens").select("*").order("sort_order"),
+    ]);
 
   if (dishesRes.error || groupsRes.error || optionsRes.error || categoriesRes.error) {
     console.error(
@@ -51,7 +72,7 @@ export async function getMenu(): Promise<MenuData> {
         optionsRes.error?.message ??
         categoriesRes.error?.message,
     );
-    return { categories: [], dishes: [] };
+    return { categories: [], dishes: [], allergens: fallbackAllergens() };
   }
 
   const optionsByGroup = new Map<string, Option[]>();
@@ -101,7 +122,12 @@ export async function getMenu(): Promise<MenuData> {
     groups.push({ id: "sem-categoria", name: "Outros", dishes: withoutCategory });
   }
 
-  return { categories: groups, dishes };
+  const allergens =
+    allergensRes.error || !allergensRes.data || allergensRes.data.length === 0
+      ? fallbackAllergens()
+      : allergensRes.data;
+
+  return { categories: groups, dishes, allergens };
 }
 
 /** Atalhos rápidos de notas (chips) do checkout. */
