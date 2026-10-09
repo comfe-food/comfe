@@ -75,14 +75,18 @@ export async function saveSiteSettings(
       .map(Number)
       .filter((n) => Number.isInteger(n) && n >= 0 && n <= 6),
   );
-  const schedule = Array.from({ length: 7 }, (_, day) =>
-    enabledDays.has(day)
-      ? {
-          open: String(formData.get(`open_${day}`) ?? ""),
-          close: String(formData.get(`close_${day}`) ?? ""),
-        }
-      : null,
-  );
+  // Fallback para páginas antigas em cache que ainda enviam um único
+  // `open`/`close` global em vez dos campos por dia (`open_0`, `close_0`, …).
+  const legacyOpen = formData.get("open");
+  const legacyClose = formData.get("close");
+  const schedule = Array.from({ length: 7 }, (_, day) => {
+    if (!enabledDays.has(day)) return null;
+    const open = String(formData.get(`open_${day}`) ?? legacyOpen ?? "").trim();
+    const close = String(
+      formData.get(`close_${day}`) ?? legacyClose ?? "",
+    ).trim();
+    return { open, close };
+  });
 
   const parsed = saveSiteSettingsSchema.safeParse({
     brand_name: formData.get("brand_name"),
