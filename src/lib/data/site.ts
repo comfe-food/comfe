@@ -42,6 +42,11 @@ function coerceSettings(rows: { key: string; value: unknown }[]): SiteSettingsMa
   out.pickup_slot_minutes = Number(out.pickup_slot_minutes) || 15;
   out.min_lead_time_minutes = Number(out.min_lead_time_minutes) || 20;
   out.accepting_orders = Boolean(out.accepting_orders);
+  // A coluna `value` é `jsonb not null`, por isso guardamos `""` em vez de
+  // `null`; normalizamos de volta para `null` para manter o modelo do site.
+  out.instagram_url = out.instagram_url || null;
+  out.banner_message = out.banner_message || null;
+  out.mbway_payee = out.mbway_payee || null;
   if (typeof out.phone !== "string" || !/^\d{9}$/.test(out.phone)) {
     out.phone = DEFAULT_SITE_SETTINGS.phone;
   }

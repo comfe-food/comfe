@@ -120,19 +120,19 @@ export async function saveSiteSettings(
     brand_name: v.brand_name,
     phone: v.phone,
     whatsapp_number: v.whatsapp_number,
-    instagram_url: v.instagram_url || null,
+    instagram_url: v.instagram_url,
     pickup_only_notice: v.pickup_only_notice,
     hero_title: v.hero_title,
     hero_subtitle: v.hero_subtitle,
     story_title: v.story_title,
     story_text: v.story_text,
-    banner_message: v.banner_message || null,
+    banner_message: v.banner_message,
     accepting_orders: v.accepting_orders,
     opening_hours: v.opening_hours,
     pickup_slot_minutes: v.pickup_slot_minutes,
     min_lead_time_minutes: v.min_lead_time_minutes,
     payment_mode: v.payment_mode,
-    mbway_payee: v.mbway_payee || null,
+    mbway_payee: v.mbway_payee,
   };
 
   const rows = Object.entries(values).map(([key, value]) => ({
