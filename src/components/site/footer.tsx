@@ -1,23 +1,11 @@
 import Link from "next/link";
 import { CurrentYear } from "@/components/site/current-year";
+import { formatScheduleLines } from "@/lib/business/hours";
 import { getStaticConfig, t } from "@/lib/static-config";
 import type { SiteSettingsMap } from "@/lib/types";
 
 export function SiteFooter({ settings }: { settings: SiteSettingsMap }) {
-  const hours = settings.opening_hours;
-  const dayNames = [
-    "domingo",
-    "segunda-feira",
-    "terça-feira",
-    "quarta-feira",
-    "quinta-feira",
-    "sexta-feira",
-    "sábado",
-  ];
-  const daysLabel =
-    hours.days.length === 7
-      ? "Todos os dias"
-      : hours.days.map((d) => dayNames[d]).join(", ");
+  const scheduleLines = formatScheduleLines(settings.opening_hours);
 
   return (
     <footer className="mt-auto bg-accent text-paper">
@@ -31,10 +19,12 @@ export function SiteFooter({ settings }: { settings: SiteSettingsMap }) {
           <h2 className="font-sans text-xs font-bold uppercase tracking-wide text-paper/80">
             Horário
           </h2>
-          <p className="mt-2">
-            {daysLabel}
-            <br />
-            {hours.open} – {hours.close}
+          <p className="mt-2 space-y-0.5">
+            {scheduleLines.map((line) => (
+              <span key={line} className="block">
+                {line}
+              </span>
+            ))}
           </p>
         </div>
 

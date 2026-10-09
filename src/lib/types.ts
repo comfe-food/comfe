@@ -138,10 +138,14 @@ export type FormState = {
   done?: boolean;
 }
 
-export type OpeningHours = {
+export type DaySchedule = {
   open: string;
   close: string;
-  days: number[];
+}
+
+export type OpeningHours = {
+  /** Horário por dia da semana (0 = domingo … 6 = sábado). null = fechado. */
+  schedule: (DaySchedule | null)[];
 }
 
 export type SiteSettingsMap = {

@@ -19,7 +19,7 @@ export default function PrivacyPage() {
           <p className="mt-1">
             Só recolhemos o <strong>nome</strong> e o <strong>número de
             telemóvel</strong>, e apenas porque são necessários para preparar e
-            entregar o teu pedido e para enviar o pedido de pagamento MB WAY.
+            entregar o teu pedido e para te contactar em caso de dúvida.
           </p>
         </section>
 
@@ -35,9 +35,8 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-lg">Pagamentos</h2>
           <p className="mt-1">
-            O pagamento é feito por MB WAY, na tua própria aplicação, junto do
-            nosso agregador de pagamentos. A Comfe não tem acesso aos dados do teu
-            cartão ou da tua conta bancária.
+            O pagamento é feito no momento da recolha do pedido. A Comfe não
+            recolhe nem armazena dados de cartão ou de conta bancária.
           </p>
         </section>
 

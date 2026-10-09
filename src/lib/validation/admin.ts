@@ -40,12 +40,24 @@ export const saveSiteSettingsSchema = z.object({
   story_text: z.string().trim().max(MAX_STORY),
   banner_message: z.string().trim().max(MAX_NOTES_FIELD),
   accepting_orders: z.boolean(),
-  open: timeSchema,
-  close: timeSchema,
-  days: z
-    .array(z.number().int().min(0, "Dia inválido").max(6, "Dia inválido"))
-    .min(1, "Escolhe pelo menos um dia")
-    .max(7),
+  opening_hours: z
+    .object({
+      schedule: z
+        .array(
+          z
+            .object({ open: timeSchema, close: timeSchema })
+            .refine((d) => d.open < d.close, {
+              message: "O fecho tem de ser depois da abertura",
+              path: ["close"],
+            })
+            .nullable(),
+        )
+        .length(7, "Horário inválido"),
+    })
+    .refine((oh) => oh.schedule.some((d) => d !== null), {
+      message: "Escolhe pelo menos um dia",
+      path: ["schedule"],
+    }),
   pickup_slot_minutes: z.coerce
     .number()
     .int("Usa um número inteiro")

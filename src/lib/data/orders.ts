@@ -66,6 +66,9 @@ export async function createOrder(
     if (!pickupTime) throw new PickupTimeError();
   }
 
+  const provider = getPaymentProvider(settings.payment_mode);
+  const automated = provider.id === "ifthenpay";
+
   const { data: order, error: orderError } = await supabase
     .from("orders")
     .insert({
@@ -75,7 +78,7 @@ export async function createOrder(
       notes: input.notes || null,
       subtotal: String(priced.subtotal),
       total: String(priced.total),
-      status: "pending_payment",
+      status: automated ? "pending_payment" : "new",
       payment_status: "pending",
       payment_method: "mbway",
       ip_hash: ipHash,
@@ -110,7 +113,6 @@ export async function createOrder(
     throw new Error(`Não foi possível guardar os itens: ${itemsError.message}`);
   }
 
-  const provider = getPaymentProvider(settings.payment_mode);
   const payment = await provider.createMbWayPayment({
     orderId: order.id,
     orderNumber: order.order_number,
@@ -139,7 +141,7 @@ export async function createOrder(
   return {
     token: order.public_token,
     orderNumber: order.order_number,
-    status: "pending_payment",
+    status: automated ? "pending_payment" : "new",
     payment,
   };
 }

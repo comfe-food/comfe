@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   cancelOrderAdmin,
-  confirmManualPaymentAdmin,
   setOrderStatus,
   type ActionResult,
 } from "@/app/admin/actions";
@@ -16,7 +15,7 @@ import { getBrowserClient } from "@/lib/supabase/client";
 
 const SOUND_URL = "/sounds/new-order.wav";
 const STATUS_LABEL: Record<OrderStatus, string> = {
-  pending_payment: "A aguardar pagamento",
+  pending_payment: "Por confirmar",
   new: "Novo",
   preparing: "Em preparação",
   ready: "Pronto",
@@ -40,15 +39,14 @@ export function OrdersBoard({ initialOrders }: { initialOrders: AdminOrder[] }) 
     setOrders(initialOrders);
   }
 
-  const pending = useMemo(
-    () => orders.filter((o) => o.paymentStatus !== "paid"),
+  const incoming = useMemo(
+    () => orders.filter((o) => o.status === "new"),
     [orders],
   );
-  const active = useMemo(
-    () => orders.filter((o) => o.paymentStatus === "paid"),
+  const inProgress = useMemo(
+    () => orders.filter((o) => o.status !== "new"),
     [orders],
   );
-  const withAlert = useMemo(() => active.filter((o) => o.status === "new"), [active]);
 
   // Realtime: novo pedido ou mudanças sem re-carregar a página
   useEffect(() => {
@@ -73,12 +71,12 @@ export function OrdersBoard({ initialOrders }: { initialOrders: AdminOrder[] }) 
 
   // Som de pedido novo: enquanto houver pedidos por abrir, toca a cada 10 s
   useEffect(() => {
-    if (!soundEnabled || withAlert.length === 0) return;
+    if (!soundEnabled || incoming.length === 0) return;
     const play = () => audioRef.current?.play().catch(() => {});
     const id = setInterval(play, 10_000);
     play();
     return () => clearInterval(id);
-  }, [soundEnabled, withAlert.length]);
+  }, [soundEnabled, incoming.length]);
 
   // Manter o ecrã ligado (com degradação silenciosa)
   useEffect(() => {
@@ -146,13 +144,13 @@ export function OrdersBoard({ initialOrders }: { initialOrders: AdminOrder[] }) 
 
       <div className="grid grid-cols-2 border border-line bg-surface">
         <div className="border-r border-line p-4 text-center">
-          <p className="font-display text-3xl">{pending.length}</p>
+          <p className="font-display text-3xl">{incoming.length}</p>
           <p className="mt-1 text-2xs font-semibold uppercase text-ink-muted">
-            A aguardar pagamento
+            Novos
           </p>
         </div>
         <div className="p-4 text-center">
-          <p className="font-display text-3xl">{active.length}</p>
+          <p className="font-display text-3xl">{inProgress.length}</p>
           <p className="mt-1 text-2xs font-semibold uppercase text-ink-muted">
             Em curso
           </p>
@@ -174,71 +172,17 @@ export function OrdersBoard({ initialOrders }: { initialOrders: AdminOrder[] }) 
         </div>
       )}
 
-      <section aria-labelledby="pending-heading">
-        <h2 id="pending-heading" className="section-title">
-          A aguardar pagamento
-        </h2>
-        {pending.length === 0 ? (
-          <p className="text-sm text-ink-muted">Sem pedidos por pagar.</p>
-        ) : (
-          <div className="space-y-3">
-            {pending.map((o) => (
-              <OrderCard key={o.id} order={o} showTicker>
-                <button
-                  type="button"
-                  className="btn btn-primary w-full md:w-auto"
-                  onClick={() => run(confirmManualPaymentAdmin(o.id))}
-                >
-                  Marcar como pago
-                </button>
-                <button
-                  type="button"
-                  className="hidden text-sm font-semibold underline underline-offset-4 text-danger md:inline-block"
-                  onClick={() => run(cancelOrderAdmin(o.id))}
-                >
-                  Cancelar pedido
-                </button>
-                <div className="md:hidden">
-                  <ActionMenu
-                    ariaLabel={`Ações do pedido nº ${o.orderNumber}`}
-                    items={[
-                      {
-                        label: "Marcar como pago",
-                        onClick: () => run(confirmManualPaymentAdmin(o.id)),
-                      },
-                      {
-                        label: "Cancelar pedido",
-                        danger: true,
-                        onClick: () => run(cancelOrderAdmin(o.id)),
-                      },
-                    ]}
-                  />
-                </div>
-              </OrderCard>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section aria-labelledby="active-heading">
-        <h2 id="active-heading" className="section-title">
+      <section aria-labelledby="orders-heading">
+        <h2 id="orders-heading" className="section-title">
           Em curso
         </h2>
-        {active.length === 0 ? (
-          <p className="text-sm text-ink-muted">Ainda não há pedidos pagos.</p>
-        ) : (
-          <div className="space-y-3">
-            {active.map((o) => (
-              <OrderCard
-                key={o.id}
-                order={o}
-                showTicker={o.status === "new"}
-              >
-                <StatusActions order={o} run={run} />
-              </OrderCard>
-            ))}
-          </div>
-        )}
+        <div className="space-y-3">
+          {orders.map((o) => (
+            <OrderCard key={o.id} order={o} showTicker={o.status === "new"}>
+              <StatusActions order={o} run={run} />
+            </OrderCard>
+          ))}
+        </div>
       </section>
     </main>
   );
@@ -378,7 +322,7 @@ function OrderCard({
 
       <p className="mt-3 flex items-center justify-between border-t border-line pt-3">
         <span className="text-2xs font-semibold uppercase text-ink-muted">
-          {order.paymentStatus === "paid" ? "Pago" : "Por pagar"}
+          Total
         </span>
         <span className="font-display text-2xl">{formatEuro(order.total)}</span>
       </p>

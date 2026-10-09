@@ -1,5 +1,6 @@
 import { getMenu, getNotePresets } from "@/lib/data/menu";
 import { getSiteSettings } from "@/lib/data/site";
+import { groupSchedule } from "@/lib/business/hours";
 import { t } from "@/lib/static-config";
 import { CartBar } from "@/components/cart/cart-bar";
 import { DishDialog } from "@/components/menu/dish-dialog";
@@ -9,6 +10,16 @@ import { ContactsSection } from "@/components/site/contacts";
 import { SiteFooter } from "@/components/site/footer";
 import { Hero, SiteBanner, SiteHeader } from "@/components/site/header";
 import { HowItWorks, StorySection } from "@/components/site/sections";
+
+const SCHEMA_DAYS = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
 
 export default async function HomePage() {
   const [settings, menu, presets] = await Promise.all([
@@ -29,25 +40,12 @@ export default async function HomePage() {
       "@type": "PostalAddress",
       addressCountry: "PT",
     },
-    openingHoursSpecification: [
-      {
-        "@type": "OpeningHoursSpecification",
-        dayOfWeek: settings.opening_hours.days.map(
-          (d) =>
-            [
-              "Sunday",
-              "Monday",
-              "Tuesday",
-              "Wednesday",
-              "Thursday",
-              "Friday",
-              "Saturday",
-            ][d],
-        ),
-        opens: settings.opening_hours.open,
-        closes: settings.opening_hours.close,
-      },
-    ],
+    openingHoursSpecification: groupSchedule(settings.opening_hours).map((g) => ({
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: g.days.map((d) => SCHEMA_DAYS[d]),
+      opens: g.open,
+      closes: g.close,
+    })),
     potentialAction: {
       "@type": "OrderAction",
       target: {

@@ -1,3 +1,4 @@
+import { formatScheduleLines } from "@/lib/business/hours";
 import { getStaticConfig, t } from "@/lib/static-config";
 import type { SiteSettingsMap } from "@/lib/types";
 
@@ -24,8 +25,7 @@ export function StorySection({ settings }: { settings: SiteSettingsMap }) {
 
 export function HowItWorks({ settings }: { settings: SiteSettingsMap }) {
   const steps = getStaticConfig().steps;
-  const hours = settings.opening_hours;
-  const dayNames = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
+  const scheduleLines = formatScheduleLines(settings.opening_hours);
 
   return (
     <section
@@ -54,18 +54,13 @@ export function HowItWorks({ settings }: { settings: SiteSettingsMap }) {
       </ol>
 
       <div className="mt-5 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
-        <p className="font-semibold">
-          Todos os dias, das {hours.open} às {hours.close}
-        </p>
+        <div className="space-y-0.5 font-semibold">
+          {scheduleLines.map((line) => (
+            <p key={line}>{line}</p>
+          ))}
+        </div>
         <p className="font-semibold">{settings.pickup_only_notice}</p>
       </div>
-
-      <p className="mt-3 text-xs text-ink-muted">
-        Dias de pedidos:{" "}
-        {hours.days.length === 7
-          ? "todos os dias"
-          : hours.days.map((d) => dayNames[d]).join(", ")}
-      </p>
     </section>
   );
 }

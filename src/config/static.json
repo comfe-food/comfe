@@ -34,9 +34,9 @@
     "closedNow": "Fechado agora",
     "openNow": "Aberto agora",
     "pickupOnly": "Apenas recolha no local.",
-    "payMbWay": "Pagamento por MB WAY",
-    "checkoutNotice": "Recolha no local. Pagamento por MB WAY.",
-    "confirmAndPay": "Confirmar e pagar com MB WAY",
+    "payMbWay": "Pagamento na recolha",
+    "checkoutNotice": "Recolha no local. Pagamento na recolha.",
+    "confirmAndPay": "Confirmar pedido",
     "processing": "A processar…",
     "errorGeneric": "Algo correu mal. Tenta novamente, por favor.",
     "errorRequired": "Este campo é obrigatório.",
@@ -56,7 +56,7 @@
     "generalNotes": "Notas gerais do pedido",
     "generalNotesPlaceholder": "Alguma coisa que devamos saber?",
     "customerName": "Nome",
-    "customerPhone": "Telemóvel (MB WAY)",
+    "customerPhone": "Telemóvel",
     "pickupTime": "Hora de recolha (opcional)",
     "pickupTimeAsap": "Assim que estiver pronto",
     "subtotal": "Subtotal",
@@ -88,14 +88,14 @@
   },
   "steps": [
     { "number": 1, "title": "Escolhe", "text": "Vê o menu da semana e monta o teu pedido." },
-    { "number": 2, "title": "Paga com MB WAY", "text": "Recebes o pedido de pagamento na app MB WAY." },
-    { "number": 3, "title": "Recolhe", "text": "Passas pelo Comfe na hora combinada e levas tudo quentinho." }
+    { "number": 2, "title": "Encomenda", "text": "Confirma o teu pedido no site." },
+    { "number": 3, "title": "Recolhe e paga", "text": "Passas pelo Comfe na hora combinada, pagas na recolha e levas tudo quentinho." }
   ],
   "seo": {
     "brandName": "Comfe",
     "defaultTitle": "Comida caseira para levar",
-    "defaultDescription": "Comfe — take away de comida caseira feita com carinho. Menu novo todas as semanas. Encomenda online, paga com MB WAY e recolhe no local.",
-    "keywords": ["take away", "comida caseira", "comida para levar", "MB WAY", "menu semanal", "Comfe"],
+    "defaultDescription": "Comfe — take away de comida caseira feita com carinho. Menu novo todas as semanas. Encomenda online e recolhe no local.",
+    "keywords": ["take away", "comida caseira", "comida para levar", "menu semanal", "Comfe"],
     "allergenNotice": "A Comfe informa que os 14 alergénios de declaração obrigatória da UE estão disponíveis em cada prato."
   },
   "design": {

@@ -2,6 +2,10 @@ import "server-only";
 
 import { cacheLife, cacheTag } from "next/cache";
 import type { SiteSettingsMap } from "@/lib/types";
+import {
+  DEFAULT_OPENING_HOURS,
+  normalizeOpeningHours,
+} from "@/lib/business/hours";
 import { getServiceClient } from "@/lib/supabase/admin";
 import { getPublicClient } from "@/lib/supabase/public";
 
@@ -10,7 +14,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsMap = {
   phone: "938067719",
   whatsapp_number: "351938067719",
   instagram_url: null,
-  opening_hours: { open: "17:00", close: "21:00", days: [0, 1, 2, 3, 4, 5, 6] },
+  opening_hours: DEFAULT_OPENING_HOURS,
   accepting_orders: true,
   pickup_only_notice: "Apenas recolha no local.",
   hero_title: "Comida caseira, feita com carinho",
@@ -34,15 +38,7 @@ function coerceSettings(rows: { key: string; value: unknown }[]): SiteSettingsMa
   const out = merged as unknown as SiteSettingsMap;
 
   // Sanitização defensiva dos campos estruturados
-  const oh = out.opening_hours;
-  if (
-    !oh ||
-    typeof oh.open !== "string" ||
-    typeof oh.close !== "string" ||
-    !Array.isArray(oh.days)
-  ) {
-    out.opening_hours = DEFAULT_SITE_SETTINGS.opening_hours;
-  }
+  out.opening_hours = normalizeOpeningHours(out.opening_hours);
   out.pickup_slot_minutes = Number(out.pickup_slot_minutes) || 15;
   out.min_lead_time_minutes = Number(out.min_lead_time_minutes) || 20;
   out.accepting_orders = Boolean(out.accepting_orders);

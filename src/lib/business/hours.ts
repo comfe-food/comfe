@@ -1,3 +1,5 @@
+import type { DaySchedule, OpeningHours } from "@/lib/types";
+
 export const TIMEZONE = "Europe/Lisbon";
 
 export interface ClockParts {
@@ -6,7 +8,7 @@ export interface ClockParts {
   day: number;
   hour: number;
   minute: number;
-  /** 0 = domingo … 6 = sábado (mesma convenção do array `opening_hours.days`) */
+  /** 0 = domingo … 6 = sábado (índice de `opening_hours.schedule`) */
   weekday: number;
 }
 
@@ -58,15 +60,109 @@ export function minutesOfDay(hour: string): number {
   return (h || 0) * 60 + (m || 0);
 }
 
-export interface OpeningHoursLike {
+export const WEEKDAYS_PT = [
+  "domingo",
+  "segunda-feira",
+  "terça-feira",
+  "quarta-feira",
+  "quinta-feira",
+  "sexta-feira",
+  "sábado",
+];
+
+export const DEFAULT_OPENING_HOURS: OpeningHours = {
+  schedule: Array.from({ length: 7 }, () => ({ open: "17:00", close: "21:00" })),
+};
+
+const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+function normalizeDay(value: unknown): DaySchedule | null {
+  if (!value || typeof value !== "object") return null;
+  const { open, close } = value as { open?: unknown; close?: unknown };
+  if (
+    typeof open === "string" &&
+    typeof close === "string" &&
+    TIME_RE.test(open) &&
+    TIME_RE.test(close)
+  ) {
+    return { open, close };
+  }
+  return null;
+}
+
+/**
+ * Aceita o formato atual (`{ schedule: [...] }`) e o antigo
+ * (`{ open, close, days: number[] }`) e devolve sempre o formato atual.
+ */
+export function normalizeOpeningHours(value: unknown): OpeningHours {
+  if (value && typeof value === "object") {
+    const obj = value as {
+      schedule?: unknown;
+      open?: unknown;
+      close?: unknown;
+      days?: unknown;
+    };
+    if (Array.isArray(obj.schedule)) {
+      const raw = obj.schedule as unknown[];
+      return {
+        schedule: Array.from({ length: 7 }, (_, i) => normalizeDay(raw[i])),
+      };
+    }
+    if (
+      typeof obj.open === "string" &&
+      typeof obj.close === "string" &&
+      Array.isArray(obj.days)
+    ) {
+      const day: DaySchedule = { open: obj.open, close: obj.close };
+      const openDays = obj.days as unknown[];
+      return {
+        schedule: Array.from({ length: 7 }, (_, i) =>
+          openDays.includes(i) ? { ...day } : null,
+        ),
+      };
+    }
+  }
+  return DEFAULT_OPENING_HOURS;
+}
+
+export interface ScheduledRange {
+  days: number[];
   open: string;
   close: string;
-  days: number[];
+}
+
+/** Agrupa dias consecutivos com o mesmo horário, para apresentação. */
+export function groupSchedule(oh: OpeningHours): ScheduledRange[] {
+  const groups: ScheduledRange[] = [];
+  oh.schedule.forEach((day, index) => {
+    if (!day) return;
+    const last = groups[groups.length - 1];
+    if (last && last.open === day.open && last.close === day.close) {
+      last.days.push(index);
+    } else {
+      groups.push({ days: [index], open: day.open, close: day.close });
+    }
+  });
+  return groups;
+}
+
+/** Linhas legíveis do horário (ex.: "Todos os dias: 17:00–21:00"). */
+export function formatScheduleLines(
+  oh: OpeningHours,
+  dayNames: string[] = WEEKDAYS_PT,
+): string[] {
+  return groupSchedule(oh).map((g) => {
+    const label =
+      g.days.length === 7
+        ? "Todos os dias"
+        : g.days.map((d) => dayNames[d]).join(", ");
+    return `${label}: ${g.open}–${g.close}`;
+  });
 }
 
 export interface OpenStateInput {
   accepting_orders: boolean;
-  opening_hours: OpeningHoursLike;
+  opening_hours: OpeningHours;
 }
 
 export interface OpenState {
@@ -82,13 +178,12 @@ export function getOpenState(
   if (!input.accepting_orders) return { isOpen: false, reason: "switched_off" };
 
   const p = parts(now);
-  const { opening_hours: oh } = input;
-
-  if (!oh.days.includes(p.weekday)) return { isOpen: false, reason: "closed_day" };
+  const today = input.opening_hours.schedule[p.weekday];
+  if (!today) return { isOpen: false, reason: "closed_day" };
 
   const current = p.hour * 60 + p.minute;
-  const open = minutesOfDay(oh.open);
-  const close = minutesOfDay(oh.close);
+  const open = minutesOfDay(today.open);
+  const close = minutesOfDay(today.close);
 
   if (current < open || current >= close) {
     return { isOpen: false, reason: "outside_hours" };
@@ -97,7 +192,7 @@ export function getOpenState(
 }
 
 export interface SlotSettings {
-  opening_hours: OpeningHoursLike;
+  opening_hours: OpeningHours;
   pickup_slot_minutes: number;
   min_lead_time_minutes: number;
 }
@@ -113,10 +208,11 @@ export function getPickupSlots(
   const p = parts(now);
   const { opening_hours: oh, pickup_slot_minutes, min_lead_time_minutes } = settings;
 
-  if (!oh.days.includes(p.weekday)) return [];
+  const today = oh.schedule[p.weekday];
+  if (!today) return [];
 
-  const open = minutesOfDay(oh.open);
-  const close = minutesOfDay(oh.close);
+  const open = minutesOfDay(today.open);
+  const close = minutesOfDay(today.close);
   const step = Math.max(5, pickup_slot_minutes || 15);
   const earliest = p.hour * 60 + p.minute + Math.max(0, min_lead_time_minutes || 0);
 
@@ -161,11 +257,12 @@ export function validatePickupTime(
   if (date.getTime() <= now.getTime()) return null;
 
   const p = parts(date);
-  if (!settings.opening_hours.days.includes(p.weekday)) return null;
+  const today = settings.opening_hours.schedule[p.weekday];
+  if (!today) return null;
 
   const minutes = p.hour * 60 + p.minute;
-  const open = minutesOfDay(settings.opening_hours.open);
-  const close = minutesOfDay(settings.opening_hours.close);
+  const open = minutesOfDay(today.open);
+  const close = minutesOfDay(today.close);
   if (minutes < open || minutes >= close) return null;
 
   const earliest =

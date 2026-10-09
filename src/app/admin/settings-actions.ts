@@ -69,10 +69,20 @@ export async function saveSiteSettings(
   const session = await requireAdmin();
   if (!session) redirect("/admin/login");
 
-  const days = formData
-    .getAll("days")
-    .map(Number)
-    .filter((n) => Number.isInteger(n) && n >= 0 && n <= 6);
+  const enabledDays = new Set(
+    formData
+      .getAll("days")
+      .map(Number)
+      .filter((n) => Number.isInteger(n) && n >= 0 && n <= 6),
+  );
+  const schedule = Array.from({ length: 7 }, (_, day) =>
+    enabledDays.has(day)
+      ? {
+          open: String(formData.get(`open_${day}`) ?? ""),
+          close: String(formData.get(`close_${day}`) ?? ""),
+        }
+      : null,
+  );
 
   const parsed = saveSiteSettingsSchema.safeParse({
     brand_name: formData.get("brand_name"),
@@ -86,9 +96,7 @@ export async function saveSiteSettings(
     story_text: formData.get("story_text") ?? "",
     banner_message: formData.get("banner_message") ?? "",
     accepting_orders: formData.get("accepting_orders") === "on",
-    open: formData.get("open"),
-    close: formData.get("close"),
-    days,
+    opening_hours: { schedule },
     pickup_slot_minutes: formData.get("pickup_slot_minutes"),
     min_lead_time_minutes: formData.get("min_lead_time_minutes"),
     payment_mode: formData.get("payment_mode"),
@@ -116,7 +124,7 @@ export async function saveSiteSettings(
     story_text: v.story_text,
     banner_message: v.banner_message || null,
     accepting_orders: v.accepting_orders,
-    opening_hours: { open: v.open, close: v.close, days: v.days },
+    opening_hours: v.opening_hours,
     pickup_slot_minutes: v.pickup_slot_minutes,
     min_lead_time_minutes: v.min_lead_time_minutes,
     payment_mode: v.payment_mode,

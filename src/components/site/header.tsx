@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { SiteSettingsMap } from "@/lib/types";
+import { formatScheduleLines } from "@/lib/business/hours";
 import { t } from "@/lib/static-config";
 import { CartButton } from "@/components/site/cart-button";
 import { OpenStatus } from "@/components/site/open-status";
@@ -51,7 +52,7 @@ export function SiteBanner({ message }: { message: string | null }) {
 }
 
 export function Hero({ settings }: { settings: SiteSettingsMap }) {
-  const hours = settings.opening_hours;
+  const scheduleLines = formatScheduleLines(settings.opening_hours);
   return (
     <section
       aria-labelledby="hero-heading"
@@ -63,10 +64,12 @@ export function Hero({ settings }: { settings: SiteSettingsMap }) {
       <p className="mt-3 max-w-xl text-base text-ink-muted sm:text-lg">
         {settings.hero_subtitle}
       </p>
-      <p className="mt-5 border-t-2 border-accent pt-3 text-sm font-semibold">
-        Todos os dias · {hours.open}–{hours.close}
-        <span className="ml-2 font-normal text-ink-muted">{t("pickupOnly")}</span>
-      </p>
+      {scheduleLines.length > 0 && (
+        <p className="mt-5 border-t-2 border-accent pt-3 text-sm font-semibold">
+          {scheduleLines.join(" · ")}
+          <span className="ml-2 font-normal text-ink-muted">{t("pickupOnly")}</span>
+        </p>
+      )}
     </section>
   );
 }

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { DEFAULT_SITE_SETTINGS } from "@/lib/data/site";
+import { normalizeOpeningHours } from "@/lib/business/hours";
 import { createSessionClient } from "@/lib/supabase/server";
 import type { SiteSettingsMap } from "@/lib/types";
 
@@ -22,5 +23,7 @@ export async function getAdminSiteSettings(): Promise<SiteSettingsMap> {
   for (const row of data) {
     if (row.value !== undefined && row.value !== null) merged[row.key] = row.value;
   }
-  return merged as SiteSettingsMap;
+  const out = merged as SiteSettingsMap;
+  out.opening_hours = normalizeOpeningHours(out.opening_hours);
+  return out;
 }

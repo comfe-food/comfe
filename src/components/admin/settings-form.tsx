@@ -170,43 +170,45 @@ export function SettingsForm({ settings }: { settings: SiteSettingsMap }) {
           <span className="font-semibold">Aceitar pedidos</span>
         </label>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Abertura">
-            <input
-              name="open"
-              type="time"
-              required
-              defaultValue={settings.opening_hours.open}
-              className="field-input"
-            />
-          </Field>
-          <Field label="Fecho">
-            <input
-              name="close"
-              type="time"
-              required
-              defaultValue={settings.opening_hours.close}
-              className="field-input"
-            />
-          </Field>
-        </div>
-
-        <fieldset>
-          <legend className="field-label">Dias de pedidos</legend>
-          <div className="flex flex-wrap gap-x-4 gap-y-2">
-            {DAY_NAMES.map((day, index) => (
-              <label key={day} className="flex items-center gap-2 text-sm">
+        <fieldset className="space-y-2">
+          <legend className="field-label">
+            Horário por dia
+            <span className="ml-1 font-normal text-ink-muted">
+              (desmarca os dias fechados)
+            </span>
+          </legend>
+          {DAY_NAMES.map((day, index) => {
+            const dayHours = settings.opening_hours.schedule[index];
+            return (
+              <div key={day} className="flex flex-wrap items-center gap-2">
+                <label className="flex w-28 items-center gap-2 text-sm capitalize">
+                  <input
+                    type="checkbox"
+                    name="days"
+                    value={index}
+                    defaultChecked={dayHours !== null}
+                    className="h-4 w-4 accent-accent"
+                  />
+                  {day}
+                </label>
                 <input
-                  type="checkbox"
-                  name="days"
-                  value={index}
-                  defaultChecked={settings.opening_hours.days.includes(index)}
-                  className="h-4 w-4 accent-accent"
+                  type="time"
+                  name={`open_${index}`}
+                  defaultValue={dayHours?.open ?? "17:00"}
+                  aria-label={`Abertura de ${day}`}
+                  className="field-input w-32"
                 />
-                {day}
-              </label>
-            ))}
-          </div>
+                <span className="text-sm text-ink-muted">às</span>
+                <input
+                  type="time"
+                  name={`close_${index}`}
+                  defaultValue={dayHours?.close ?? "21:00"}
+                  aria-label={`Fecho de ${day}`}
+                  className="field-input w-32"
+                />
+              </div>
+            );
+          })}
         </fieldset>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -233,31 +235,12 @@ export function SettingsForm({ settings }: { settings: SiteSettingsMap }) {
         </div>
       </section>
 
-      <section className="card space-y-4 p-5">
-        <h2 className="section-title">Pagamento</h2>
-        <Field
-          label="Modo"
-          hint="manual = o cliente paga por MB WAY e a cozinha confirma · mbway_api = cobrança automática"
-        >
-          <select
-            name="payment_mode"
-            defaultValue={settings.payment_mode}
-            className="field-input"
-          >
-            <option value="manual">Manual (confirmação pela cozinha)</option>
-            <option value="mbway_api">Automático (Ifthenpay)</option>
-          </select>
-        </Field>
-        <Field label="Número MB WAY" hint="Vazio usa o telefone da casa">
-          <input
-            name="mbway_payee"
-            inputMode="numeric"
-            maxLength={9}
-            defaultValue={settings.mbway_payee ?? ""}
-            className="field-input"
-          />
-        </Field>
-      </section>
+      <input type="hidden" name="payment_mode" defaultValue={settings.payment_mode} />
+      <input
+        type="hidden"
+        name="mbway_payee"
+        defaultValue={settings.mbway_payee ?? ""}
+      />
 
       <div className="flex items-center gap-4">
         <button type="submit" disabled={pending} className="btn btn-primary">
