@@ -64,7 +64,8 @@ export function Hero({ settings }: { settings: SiteSettingsMap }) {
       </p>
       <ScheduleHours
         opening_hours={settings.opening_hours}
-        className="mt-5"
+        accepting_orders={settings.accepting_orders}
+        className="mt-5 w-full sm:max-w-sm"
       />
     </section>
   );

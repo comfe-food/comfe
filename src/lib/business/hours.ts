@@ -70,6 +70,17 @@ export const WEEKDAYS_PT = [
   "sábado",
 ];
 
+/** Abreviaturas para apresentações compactas (calendário, rodapé). */
+export const WEEKDAYS_PT_SHORT = [
+  "Dom",
+  "Seg",
+  "Ter",
+  "Qua",
+  "Qui",
+  "Sex",
+  "Sáb",
+];
+
 export const DEFAULT_OPENING_HOURS: OpeningHours = {
   schedule: Array.from({ length: 7 }, () => ({ open: "17:00", close: "21:00" })),
 };

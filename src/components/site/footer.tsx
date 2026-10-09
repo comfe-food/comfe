@@ -19,6 +19,7 @@ export function SiteFooter({ settings }: { settings: SiteSettingsMap }) {
           </h2>
           <ScheduleHours
             opening_hours={settings.opening_hours}
+            accepting_orders={settings.accepting_orders}
             tone="inverse"
             className="mt-2"
           />
