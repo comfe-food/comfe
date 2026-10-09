@@ -1,6 +1,6 @@
-import { formatScheduleLines } from "@/lib/business/hours";
 import { getStaticConfig, t } from "@/lib/static-config";
 import type { SiteSettingsMap } from "@/lib/types";
+import { ScheduleHours } from "@/components/site/schedule-hours";
 
 export function StorySection({ settings }: { settings: SiteSettingsMap }) {
   if (!settings.story_text) return null;
@@ -25,7 +25,6 @@ export function StorySection({ settings }: { settings: SiteSettingsMap }) {
 
 export function HowItWorks({ settings }: { settings: SiteSettingsMap }) {
   const steps = getStaticConfig().steps;
-  const scheduleLines = formatScheduleLines(settings.opening_hours);
 
   return (
     <section
@@ -53,12 +52,8 @@ export function HowItWorks({ settings }: { settings: SiteSettingsMap }) {
         ))}
       </ol>
 
-      <div className="mt-5 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
-        <div className="space-y-0.5 font-semibold">
-          {scheduleLines.map((line) => (
-            <p key={line}>{line}</p>
-          ))}
-        </div>
+      <div className="mt-5 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+        <ScheduleHours opening_hours={settings.opening_hours} />
         <p className="font-semibold">{settings.pickup_only_notice}</p>
       </div>
     </section>
