@@ -64,14 +64,14 @@ export function AllergensEditor({ allergens }: { allergens: Allergen[] }) {
                 <span className="ml-auto hidden flex-wrap gap-3 text-sm md:flex">
                   <button
                     type="button"
-                    className="font-semibold underline underline-offset-4"
+                    className="font-semibold"
                     onClick={() => setEditing(a.code)}
                   >
                     Editar
                   </button>
                   <button
                     type="button"
-                    className="font-semibold text-danger underline underline-offset-4"
+                    className="font-semibold text-danger"
                     onClick={() =>
                       confirm(`Remover o alergénio «${a.name_pt}»?`) &&
                       run(deleteAllergen(a.code))

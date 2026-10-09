@@ -87,6 +87,7 @@ export interface CartApi {
   count: number;
   subtotal: number;
   addItem: (item: Omit<CartItem, "id" | "quantity">, quantity: number) => void;
+  updateItem: (id: string, item: Omit<CartItem, "id">) => void;
   setQuantity: (id: string, quantity: number) => void;
   removeItem: (id: string) => void;
   clear: () => void;
@@ -121,6 +122,15 @@ export function useCart(): CartApi {
     [],
   );
 
+  const updateItem = useCallback((id: string, item: Omit<CartItem, "id">) => {
+    const qty = Math.max(1, Math.min(99, Math.floor(item.quantity) || 1));
+    commit(
+      readStorage().map((a) =>
+        a.id === id ? { ...item, id: a.id, quantity: qty } : a,
+      ),
+    );
+  }, []);
+
   const setQuantity = useCallback((id: string, quantity: number) => {
     const qty = Math.max(0, Math.min(99, Math.floor(quantity) || 0));
     const prev = readStorage();
@@ -144,5 +154,5 @@ export function useCart(): CartApi {
     subtotal += unitPrice(item) * item.quantity;
   }
 
-  return { items, count, subtotal, addItem, setQuantity, removeItem, clear };
+  return { items, count, subtotal, addItem, updateItem, setQuantity, removeItem, clear };
 }

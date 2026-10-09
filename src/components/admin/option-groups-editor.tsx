@@ -96,7 +96,7 @@ export function OptionGroupsEditor({
                   <span className="ml-auto hidden flex-wrap gap-3 text-sm md:flex">
                     <button
                       type="button"
-                      className="font-semibold underline underline-offset-4"
+                      className="font-semibold"
                       onClick={() => {
                         setEditingGroup(group.id);
                         setAddingOptionFor(null);
@@ -107,7 +107,7 @@ export function OptionGroupsEditor({
                     </button>
                     <button
                       type="button"
-                      className="font-semibold text-danger underline underline-offset-4"
+                      className="font-semibold text-danger"
                       onClick={() =>
                         confirm(`Remover o grupo «${group.name}» e as suas opções?`) &&
                         run(deleteOptionGroup(group.id))
@@ -168,7 +168,7 @@ export function OptionGroupsEditor({
                       <span className="ml-auto hidden flex-wrap gap-3 md:flex">
                         <button
                           type="button"
-                          className="font-semibold underline underline-offset-4"
+                          className="font-semibold"
                           onClick={() => {
                             setEditingOption({ id: opt.id, groupId: group.id });
                             setEditingGroup(null);
@@ -179,7 +179,7 @@ export function OptionGroupsEditor({
                         </button>
                         <button
                           type="button"
-                          className="font-semibold text-danger underline underline-offset-4"
+                          className="font-semibold text-danger"
                           onClick={() =>
                             confirm(`Remover a opção «${opt.name}»?`) &&
                             run(deleteOption(opt.id))
@@ -230,7 +230,7 @@ export function OptionGroupsEditor({
                   <li>
                     <button
                       type="button"
-                      className="text-sm font-semibold underline underline-offset-4"
+                      className="text-sm font-semibold"
                       onClick={() => {
                         setAddingOptionFor(group.id);
                         setEditingGroup(null);

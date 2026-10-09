@@ -223,7 +223,7 @@ function StatusActions({
       )}
       <button
         type="button"
-        className="hidden text-sm font-semibold underline underline-offset-4 text-danger md:inline-block"
+        className="hidden text-sm font-semibold text-danger hover:opacity-80 md:inline-block"
         onClick={cancel}
       >
         Cancelar

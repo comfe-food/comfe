@@ -7,7 +7,7 @@ import { formatEuro } from "@/lib/format";
 import type { MenuDish } from "@/lib/data/menu";
 import type { Allergen, NotePreset } from "@/lib/types";
 import { t } from "@/lib/static-config";
-import { useCart } from "@/components/cart/cart-context";
+import { useCart, type CartItem } from "@/components/cart/cart-context";
 import { useMenuUi } from "@/components/menu/menu-context";
 import { AllergenList } from "@/components/menu/allergens";
 
@@ -27,7 +27,7 @@ export function DishDialog({
   presets: NotePreset[];
   allergens: Allergen[];
 }) {
-  const { activeDish, closeDish } = useMenuUi();
+  const { activeDish, editingItem, closeDish } = useMenuUi();
   const dialogRef = useRef<HTMLDivElement>(null);
   const lastFocused = useRef<HTMLElement | null>(null);
 
@@ -72,40 +72,67 @@ export function DishDialog({
         tabIndex={-1}
         className="relative z-10 max-h-[92vh] w-full max-w-lg overflow-y-auto border border-line bg-surface outline-none"
       >
-        <DishForm
-          key={activeDish.id}
-          dish={activeDish}
-          presets={presets}
-          allergens={allergens}
-          onClose={closeDish}
-        />
+          <DishForm
+            key={editingItem ? editingItem.id : activeDish.id}
+            dish={activeDish}
+            editingItem={editingItem}
+            presets={presets}
+            allergens={allergens}
+            onClose={closeDish}
+          />
       </div>
     </div>
   );
 }
 
+function computeOptionErrors(
+  dish: MenuDish,
+  selected: Record<string, string[]>,
+): Record<string, string> {
+  const errs: Record<string, string> = {};
+  for (const group of dish.option_groups) {
+    const chosen = selected[group.id]?.length ?? 0;
+    const required = group.is_required || group.min_select > 0;
+    if (required && chosen < Math.max(1, group.min_select)) {
+      errs[group.id] = t("errorOptionRequired");
+    } else if (chosen > group.max_select) {
+      errs[group.id] = t("errorOptionMax", { max: group.max_select });
+    }
+  }
+  return errs;
+}
+
 function DishForm({
   dish,
+  editingItem,
   presets,
   allergens,
   onClose,
 }: {
   dish: MenuDish;
+  editingItem: CartItem | null;
   presets: NotePreset[];
   allergens: Allergen[];
   onClose: () => void;
 }) {
-  const { addItem } = useCart();
+  const { addItem, updateItem } = useCart();
   const [submitted, setSubmitted] = useState(false);
 
-  const defaults = useMemo<FormValues>(
-    () => ({
-      selected: Object.fromEntries(dish.option_groups.map((g) => [g.id, []])),
-      notes: "",
-      quantity: 1,
-    }),
-    [dish],
-  );
+  const defaults = useMemo<FormValues>(() => {
+    const selected = Object.fromEntries(
+      dish.option_groups.map((g) => [g.id, [] as string[]]),
+    );
+    if (editingItem) {
+      for (const opt of editingItem.options) {
+        selected[opt.groupId]?.push(opt.optionId);
+      }
+    }
+    return {
+      selected,
+      notes: editingItem?.notes ?? "",
+      quantity: editingItem?.quantity ?? 1,
+    };
+  }, [dish.option_groups, editingItem]);
 
   const {
     register,
@@ -123,22 +150,10 @@ function DishForm({
   const quantity = watch("quantity");
   const notes = watch("notes");
 
-  const optionErrors = useMemo(() => {
-    if (!submitted) return {} as Record<string, string>;
-    const errs: Record<string, string> = {};
-    for (const group of dish.option_groups) {
-      const chosen = selected[group.id]?.length ?? 0;
-      const required = group.is_required || group.min_select > 0;
-      if (required && chosen < Math.max(1, group.min_select)) {
-        errs[group.id] = t("errorOptionRequired");
-      } else if (!required && chosen > group.max_select) {
-        errs[group.id] = t("errorOptionMax", { max: group.max_select });
-      } else if (chosen > group.max_select) {
-        errs[group.id] = t("errorOptionMax", { max: group.max_select });
-      }
-    }
-    return errs;
-  }, [submitted, selected, dish.option_groups]);
+  const optionErrors = useMemo(
+    () => computeOptionErrors(dish, selected),
+    [dish, selected],
+  );
 
   const unitPrice =
     Number(dish.price) +
@@ -153,7 +168,6 @@ function DishForm({
     );
 
   const total = unitPrice * (quantity || 1);
-  const hasOptionErrors = Object.keys(optionErrors).length > 0;
 
   const toggleOption = (groupId: string, optionId: string, maxSelect: number) => {
     const all = getValues("selected") ?? {};
@@ -178,7 +192,11 @@ function DishForm({
 
   const onSubmit = (values: FormValues) => {
     setSubmitted(true);
-    if (hasOptionErrors) return;
+
+    // Validar sempre a partir dos valores submetidos (evita estado obsoleto).
+    if (Object.keys(computeOptionErrors(dish, values.selected)).length > 0) {
+      return;
+    }
 
     const options = dish.option_groups.flatMap((group) =>
       (values.selected[group.id] ?? []).map((optId) => {
@@ -193,17 +211,20 @@ function DishForm({
       }),
     );
 
-    addItem(
-      {
-        dishId: dish.id,
-        name: dish.name,
-        imageUrl: dish.image_url,
-        basePrice: Number(dish.price),
-        options,
-        notes: values.notes.trim().slice(0, MAX_NOTES),
-      },
-      values.quantity,
-    );
+    const payload = {
+      dishId: dish.id,
+      name: dish.name,
+      imageUrl: dish.image_url,
+      basePrice: Number(dish.price),
+      options,
+      notes: values.notes.trim().slice(0, MAX_NOTES),
+    };
+
+    if (editingItem) {
+      updateItem(editingItem.id, { ...payload, quantity: values.quantity });
+    } else {
+      addItem(payload, values.quantity);
+    }
     onClose();
   };
 
@@ -263,7 +284,7 @@ function DishForm({
 
         {dish.option_groups.map((group) => {
           const chosen = selected[group.id] ?? [];
-          const err = optionErrors[group.id];
+          const err = submitted ? optionErrors[group.id] : undefined;
           const isMulti = group.max_select > 1;
           const labelId = `group-${group.id}`;
           return (
@@ -405,7 +426,11 @@ function DishForm({
           className="btn btn-primary mt-3 w-full"
           disabled={dish.is_sold_out || !dish.is_active}
         >
-          {dish.is_sold_out ? t("soldOut") : t("addToOrder")}
+          {dish.is_sold_out
+            ? t("soldOut")
+            : editingItem
+              ? t("saveChanges")
+              : t("addToOrder")}
         </button>
       </div>
     </form>

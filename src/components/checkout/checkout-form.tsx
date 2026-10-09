@@ -8,8 +8,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { formatEuro } from "@/lib/format";
 import { t } from "@/lib/static-config";
-import { MAX_ORDER_NOTES } from "@/lib/validation/order";
+import { MAX_ORDER_NOTES, MAX_QUANTITY } from "@/lib/validation/order";
 import { unitPrice, useCart } from "@/components/cart/cart-context";
+import { useMenuUi } from "@/components/menu/menu-context";
+import type { MenuDish } from "@/lib/data/menu";
 
 const checkoutSchema = z.object({
   customerName: z
@@ -38,14 +40,18 @@ interface OrderResponse {
 
 export function CheckoutForm({
   slots,
+  dishes,
 }: {
-  phone: string;
   slots: CheckoutSlot[];
+  dishes: MenuDish[];
 }) {
   const router = useRouter();
   const cart = useCart();
+  const { openDish } = useMenuUi();
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const dishById = new Map(dishes.map((d) => [d.id, d]));
 
   const {
     register,
@@ -106,7 +112,7 @@ export function CheckoutForm({
       <div className="mx-auto max-w-3xl px-4 py-16">
         <p className="section-title">{t("emptyCart")}</p>
         <p className="mb-4 text-ink-muted">{t("emptyCartHint")}</p>
-        <Link href="/" className="font-semibold underline underline-offset-4">
+        <Link href="/" className="font-semibold hover:text-accent">
           {t("backToMenu")}
         </Link>
       </div>
@@ -127,12 +133,13 @@ export function CheckoutForm({
         {...register("website")}
       />
 
-      <section aria-labelledby="checkout-items" className="card divide-y divide-line">
+      <section aria-labelledby="checkout-items" className="card">
         <h2 id="checkout-items" className="sr-only">
           {t("orderSummary")}
         </h2>
         {cart.items.map((item) => {
           const up = unitPrice(item);
+          const dish = dishById.get(item.dishId);
           return (
             <div key={item.id} className="px-5 py-3">
               <div className="flex items-start justify-between gap-3">
@@ -154,6 +161,45 @@ export function CheckoutForm({
               {item.notes && (
                 <p className="mt-1 text-sm text-ink-muted">«{item.notes}»</p>
               )}
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    aria-label="Diminuir quantidade"
+                    disabled={item.quantity <= 1}
+                    onClick={() => cart.setQuantity(item.id, item.quantity - 1)}
+                    className="flex h-9 w-9 items-center justify-center rounded-base border border-line text-lg font-bold disabled:opacity-40"
+                  >
+                    −
+                  </button>
+                  <span className="w-8 text-center font-bold">{item.quantity}</span>
+                  <button
+                    type="button"
+                    aria-label="Aumentar quantidade"
+                    disabled={item.quantity >= MAX_QUANTITY}
+                    onClick={() => cart.setQuantity(item.id, item.quantity + 1)}
+                    className="flex h-9 w-9 items-center justify-center rounded-base border border-line text-lg font-bold disabled:opacity-40"
+                  >
+                    +
+                  </button>
+                </div>
+                {dish && (
+                  <button
+                    type="button"
+                    onClick={() => openDish(dish, item)}
+                    className="min-h-[36px] rounded-base border border-line px-3 text-sm font-semibold"
+                  >
+                    {t("edit")}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => cart.removeItem(item.id)}
+                  className="min-h-[36px] rounded-base border border-line px-3 text-sm font-semibold text-danger"
+                >
+                  {t("remove")}
+                </button>
+              </div>
             </div>
           );
         })}
@@ -162,6 +208,13 @@ export function CheckoutForm({
           <span className="text-2xl font-bold">{formatEuro(cart.subtotal)}</span>
         </div>
       </section>
+
+      <Link
+        href="/"
+        className="inline-block font-semibold text-accent"
+      >
+        + {t("addMore")}
+      </Link>
 
       <fieldset className="card space-y-4 p-5">
         <legend className="sr-only">Dados de contacto</legend>
@@ -248,7 +301,7 @@ export function CheckoutForm({
 
       <p className="text-2xs text-ink-muted">
         Ao continuar confirmas que os dados estão corretos e aceitas a{" "}
-        <Link href="/politica-privacidade" className="underline">
+        <Link href="/politica-privacidade" className="font-semibold hover:text-accent">
           Política de Privacidade
         </Link>
         .

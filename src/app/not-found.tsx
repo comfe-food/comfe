@@ -14,7 +14,7 @@ export default function NotFound() {
       <p className="mt-2 text-sm text-ink-muted">{t("notFoundText")}</p>
       <Link
         href="/"
-        className="mt-5 self-start font-semibold underline underline-offset-4"
+        className="mt-5 self-start font-semibold hover:text-accent"
       >
         {t("backToMenu")}
       </Link>

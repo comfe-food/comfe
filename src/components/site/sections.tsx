@@ -9,7 +9,7 @@ export function StorySection({ settings }: { settings: SiteSettingsMap }) {
       aria-labelledby="story-heading"
       className="mx-auto max-w-3xl px-4 py-10"
     >
-      <div className="border-t-2 border-accent pt-6">
+      <div>
         <h2 id="story-heading" className="text-2xl">
           {settings.story_title}
         </h2>
@@ -36,11 +36,11 @@ export function HowItWorks({ settings }: { settings: SiteSettingsMap }) {
         {t("howItWorks")}
       </h2>
 
-      <ol className="border-t-2 border-accent">
+      <ol className="space-y-4">
         {steps.map((step) => (
           <li
             key={step.number}
-            className="grid grid-cols-[2rem_1fr] gap-x-3 border-b border-line py-4"
+            className="grid grid-cols-[2rem_1fr] gap-x-3"
           >
             <span className="font-display text-base text-accent" aria-hidden="true">
               {step.number}

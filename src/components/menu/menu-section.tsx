@@ -9,7 +9,7 @@ export function MenuSection({ menu }: { menu: MenuData }) {
         <h2 id="menu-heading" className="section-title">
           {t("menu")}
         </h2>
-        <div className="border-t border-line pt-3">
+        <div>
           <p className="font-bold">{t("emptyMenu")}</p>
           <p className="mt-1 text-sm text-ink-muted">{t("emptyMenuHint")}</p>
         </div>
@@ -32,7 +32,7 @@ export function MenuSection({ menu }: { menu: MenuData }) {
             <a
               key={cat.id}
               href={`#cat-${cat.id}`}
-              className="shrink-0 text-sm font-semibold underline underline-offset-4 hover:text-accent"
+              className="shrink-0 text-sm font-semibold text-ink-muted hover:text-accent"
             >
               {cat.name}
             </a>

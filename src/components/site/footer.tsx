@@ -33,14 +33,14 @@ export function SiteFooter({ settings }: { settings: SiteSettingsMap }) {
             Contactos
           </h2>
           <p className="mt-2 flex flex-col gap-1">
-            <a href={`tel:+351${settings.phone}`} className="underline underline-offset-2">
+            <a href={`tel:+351${settings.phone}`} className="text-paper/90 hover:text-paper">
               {settings.phone}
             </a>
             <a
               href={`https://wa.me/${settings.whatsapp_number}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="underline underline-offset-2"
+              className="text-paper/90 hover:text-paper"
             >
               WhatsApp
             </a>
@@ -49,7 +49,7 @@ export function SiteFooter({ settings }: { settings: SiteSettingsMap }) {
                 href={settings.instagram_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline underline-offset-2"
+                className="text-paper/90 hover:text-paper"
               >
                 Instagram
               </a>
@@ -58,7 +58,7 @@ export function SiteFooter({ settings }: { settings: SiteSettingsMap }) {
         </div>
       </div>
 
-      <div className="border-t border-paper/20">
+      <div>
         <div className="mx-auto max-w-3xl space-y-2 px-4 py-5 text-2xs text-paper/80">
           <p>{getStaticConfig().seo.allergenNotice}</p>
           <p>{t("allergensDisclaimer")}</p>
@@ -66,7 +66,7 @@ export function SiteFooter({ settings }: { settings: SiteSettingsMap }) {
             <span>© <CurrentYear /> {settings.brand_name}</span>
             <Link
               href="/politica-privacidade"
-              className="underline underline-offset-2"
+              className="text-paper/90 hover:text-paper"
             >
               {t("privacy")}
             </Link>

@@ -9,7 +9,7 @@ export function CartButton() {
   return (
     <Link
       href="/pedido"
-      className="text-sm font-semibold text-paper underline underline-offset-4"
+      className="text-sm font-semibold text-paper/90 hover:text-paper"
       aria-label={`Ver pedido${count > 0 ? `, ${count} itens` : ""}`}
     >
       Ver pedido{count > 0 ? ` (${count})` : ""}

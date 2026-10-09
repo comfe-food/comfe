@@ -22,10 +22,8 @@ export function AdminNav() {
             key={href}
             href={href}
             aria-current={active ? "page" : undefined}
-            className={`text-sm font-semibold underline-offset-4 ${
-              active
-                ? "underline decoration-2"
-                : "text-ink-muted hover:text-ink"
+            className={`text-sm font-semibold ${
+              active ? "text-accent" : "text-ink-muted hover:text-ink"
             }`}
           >
             {label}

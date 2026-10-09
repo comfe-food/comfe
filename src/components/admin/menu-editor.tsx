@@ -138,7 +138,7 @@ export function MenuEditor({
                         setEditingCategory(cat.id);
                         setEditingDish(null);
                       }}
-                      className="font-semibold underline underline-offset-4"
+                      className="font-semibold"
                     >
                       Editar
                     </button>
@@ -148,7 +148,7 @@ export function MenuEditor({
                         confirm(`Remover a categoria «${cat.name}»?`) &&
                         run(deleteCategory(cat.id))
                       }
-                      className="font-semibold text-danger underline underline-offset-4"
+                      className="font-semibold text-danger"
                     >
                       Remover
                     </button>
@@ -330,35 +330,35 @@ function DishRow({
         <button
           type="button"
           onClick={onEdit}
-          className="font-semibold underline underline-offset-4"
+          className="font-semibold"
         >
           Editar
         </button>
         <button
           type="button"
           onClick={onOptions}
-          className="font-semibold underline underline-offset-4"
+          className="font-semibold"
         >
           Acompanhamentos
         </button>
         <button
           type="button"
           onClick={onToggle}
-          className="font-semibold underline underline-offset-4"
+          className="font-semibold"
         >
           {dish.is_active ? "Ocultar" : "Mostrar"}
         </button>
         <button
           type="button"
           onClick={onSoldOut}
-          className="font-semibold underline underline-offset-4"
+          className="font-semibold"
         >
           {dish.is_sold_out ? "Repôr" : "Esgotar"}
         </button>
         <button
           type="button"
           onClick={onDelete}
-          className="font-semibold text-danger underline underline-offset-4"
+          className="font-semibold text-danger"
         >
           Remover
         </button>

@@ -46,7 +46,7 @@ export default async function OrderPage({
           {/* Atualiza a página quando o estado do pedido muda */}
           <OrderStatusPoller token={token} status={order.status} />
         </header>
-        <div className="card divide-y divide-line">
+        <div className="card">
           {order.items.map((item) => (
             <div key={item.id} className="px-5 py-3">
               <div className="flex items-start justify-between gap-3">
@@ -89,7 +89,7 @@ export default async function OrderPage({
           )}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-block font-semibold underline underline-offset-4"
+          className="inline-block font-semibold hover:text-accent"
         >
           {t("whatsapp")}
         </Link>

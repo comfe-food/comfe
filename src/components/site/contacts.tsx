@@ -28,7 +28,7 @@ export function ContactsSection({ settings }: { settings: SiteSettingsMap }) {
 
         <a
           href={`tel:+351${settings.phone}`}
-          className="block text-sm font-semibold underline underline-offset-4"
+          className="block text-sm font-semibold hover:text-accent"
         >
           {t("call")} {settings.phone}
         </a>
@@ -38,7 +38,7 @@ export function ContactsSection({ settings }: { settings: SiteSettingsMap }) {
             href={instagram}
             target="_blank"
             rel="noopener noreferrer"
-            className="block text-sm font-semibold underline underline-offset-4"
+            className="block text-sm font-semibold hover:text-accent"
           >
             Instagram
           </a>

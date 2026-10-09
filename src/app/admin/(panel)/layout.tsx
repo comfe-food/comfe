@@ -34,14 +34,14 @@ export default async function AdminLayout({
           <div className="flex items-center gap-4">
             <Link
               href="/"
-              className="text-sm font-semibold underline underline-offset-4"
+              className="text-sm font-semibold hover:text-accent"
             >
               Ver site
             </Link>
             <form action={signOutAdmin}>
               <button
                 type="submit"
-                className="text-sm font-semibold underline underline-offset-4 text-danger"
+                className="text-sm font-semibold text-danger hover:opacity-80"
               >
                 Sair
               </button>

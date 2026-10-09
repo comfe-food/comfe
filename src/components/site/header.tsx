@@ -65,7 +65,7 @@ export function Hero({ settings }: { settings: SiteSettingsMap }) {
         {settings.hero_subtitle}
       </p>
       {scheduleLines.length > 0 && (
-        <p className="mt-5 border-t-2 border-accent pt-3 text-sm font-semibold">
+        <p className="mt-5 text-sm font-semibold">
           {scheduleLines.join(" · ")}
           <span className="ml-2 font-normal text-ink-muted">{t("pickupOnly")}</span>
         </p>

@@ -78,13 +78,13 @@ export function DishCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-px border-t border-line bg-line">
+      <div className="grid grid-cols-2 gap-2 p-3 pt-0 sm:p-4 sm:pt-0">
         <button
           type="button"
           onClick={() => openDish(dish)}
           aria-haspopup="dialog"
           aria-label={`${t("viewDish")} — ${dish.name}`}
-          className="btn min-h-[48px] w-full bg-surface text-sm hover:bg-paper sm:text-base"
+          className="btn min-h-[48px] w-full border border-line bg-surface text-sm hover:bg-paper sm:text-base"
         >
           {t("viewDish")}
         </button>
