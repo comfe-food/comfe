@@ -1,6 +1,5 @@
 import { getStaticConfig, t } from "@/lib/static-config";
 import type { SiteSettingsMap } from "@/lib/types";
-import { ScheduleHours } from "@/components/site/schedule-hours";
 
 export function StorySection({ settings }: { settings: SiteSettingsMap }) {
   if (!settings.story_text) return null;
@@ -23,7 +22,7 @@ export function StorySection({ settings }: { settings: SiteSettingsMap }) {
   );
 }
 
-export function HowItWorks({ settings }: { settings: SiteSettingsMap }) {
+export function HowItWorks() {
   const steps = getStaticConfig().steps;
 
   return (
@@ -51,14 +50,6 @@ export function HowItWorks({ settings }: { settings: SiteSettingsMap }) {
           </li>
         ))}
       </ol>
-
-      <div className="mt-5 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
-        <ScheduleHours
-          opening_hours={settings.opening_hours}
-          accepting_orders={settings.accepting_orders}
-        />
-        <p className="font-semibold">{settings.pickup_only_notice}</p>
-      </div>
     </section>
   );
 }

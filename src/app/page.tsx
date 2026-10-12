@@ -103,7 +103,7 @@ export default async function HomePage() {
           </div>
 
           <StorySection settings={settings} />
-          <HowItWorks settings={settings} />
+          <HowItWorks />
           <ContactsSection settings={settings} />
 
           <CartBar />
