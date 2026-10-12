@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import type { SiteSettingsMap } from "@/lib/types";
 import { CartButton } from "@/components/site/cart-button";
-import { OpenStatus } from "@/components/site/open-status";
 import { ScheduleHours } from "@/components/site/schedule-hours";
 
 export function SiteHeader({ settings }: { settings: SiteSettingsMap }) {
@@ -24,10 +23,6 @@ export function SiteHeader({ settings }: { settings: SiteSettingsMap }) {
           />
         </Link>
         <div className="flex items-center gap-4">
-          <OpenStatus
-            accepting_orders={settings.accepting_orders}
-            opening_hours={settings.opening_hours}
-          />
           <CartButton />
         </div>
       </div>
