@@ -28,12 +28,31 @@ export function OptionGroupsEditor({
   const [editingOption, setEditingOption] = useState<
     { id: string; groupId: string } | null
   >(null);
+  const [removedGroupIds, setRemovedGroupIds] = useState<string[]>([]);
+  const [removedOptionIds, setRemovedOptionIds] = useState<string[]>([]);
 
-  async function run(action: Promise<ActionResult>) {
-    const result = await action;
-    if (!result.ok) setError(result.error ?? "Erro ao guardar.");
-    router.refresh();
+  async function run(action: Promise<ActionResult>, onSuccess?: () => void) {
+    try {
+      const result = await action;
+      if (!result.ok) {
+        setError(result.error ?? "Erro ao guardar.");
+        return;
+      }
+      setError(null);
+      onSuccess?.();
+    } catch {
+      setError("Erro de ligação. Tenta novamente.");
+    } finally {
+      router.refresh();
+    }
   }
+
+  const visibleGroups = groups
+    .filter((group) => !removedGroupIds.includes(group.id))
+    .map((group) => ({
+      ...group,
+      options: group.options.filter((opt) => !removedOptionIds.includes(opt.id)),
+    }));
 
   return (
     <section className="card space-y-4 p-5">
@@ -65,14 +84,14 @@ export function OptionGroupsEditor({
         </p>
       )}
 
-      {groups.length === 0 && editingGroup !== "new" && (
+      {visibleGroups.length === 0 && editingGroup !== "new" && (
         <p className="text-sm text-ink-muted">
           Sem grupos — cria o primeiro para oferecer escolhas ao cliente.
         </p>
       )}
 
       <ul className="space-y-4">
-        {groups.map((group) => {
+        {visibleGroups.map((group) => {
           const isEditingGroup = editingGroup === group.id;
           return (
             <li key={group.id} className="border-t border-line pt-4 first:border-t-0 first:pt-0">
@@ -110,7 +129,9 @@ export function OptionGroupsEditor({
                       className="font-semibold text-danger"
                       onClick={() =>
                         confirm(`Remover o grupo «${group.name}» e as suas opções?`) &&
-                        run(deleteOptionGroup(group.id))
+                        run(deleteOptionGroup(group.id), () =>
+                          setRemovedGroupIds((prev) => [...prev, group.id]),
+                        )
                       }
                     >
                       Remover
@@ -135,7 +156,10 @@ export function OptionGroupsEditor({
                           onClick: () =>
                             confirm(
                               `Remover o grupo «${group.name}» e as suas opções?`,
-                            ) && run(deleteOptionGroup(group.id)),
+                            ) &&
+                            run(deleteOptionGroup(group.id), () =>
+                              setRemovedGroupIds((prev) => [...prev, group.id]),
+                            ),
                         },
                       ]}
                     />
@@ -182,7 +206,9 @@ export function OptionGroupsEditor({
                           className="font-semibold text-danger"
                           onClick={() =>
                             confirm(`Remover a opção «${opt.name}»?`) &&
-                            run(deleteOption(opt.id))
+                            run(deleteOption(opt.id), () =>
+                              setRemovedOptionIds((prev) => [...prev, opt.id]),
+                            )
                           }
                         >
                           Remover
@@ -209,7 +235,12 @@ export function OptionGroupsEditor({
                               danger: true,
                               onClick: () =>
                                 confirm(`Remover a opção «${opt.name}»?`) &&
-                                run(deleteOption(opt.id)),
+                                run(deleteOption(opt.id), () =>
+                                  setRemovedOptionIds((prev) => [
+                                    ...prev,
+                                    opt.id,
+                                  ]),
+                                ),
                             },
                           ]}
                         />

@@ -11,12 +11,27 @@ export function AllergensEditor({ allergens }: { allergens: Allergen[] }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | "new" | null>(null);
+  const [removedCodes, setRemovedCodes] = useState<string[]>([]);
 
-  async function run(action: Promise<ActionResult>) {
-    const result = await action;
-    if (!result.ok) setError(result.error ?? "Erro ao guardar.");
-    router.refresh();
+  async function run(action: Promise<ActionResult>, onSuccess?: () => void) {
+    try {
+      const result = await action;
+      if (!result.ok) {
+        setError(result.error ?? "Erro ao guardar.");
+        return;
+      }
+      setError(null);
+      onSuccess?.();
+    } catch {
+      setError("Erro de ligação. Tenta novamente.");
+    } finally {
+      router.refresh();
+    }
   }
+
+  const visibleAllergens = allergens.filter(
+    (a) => !removedCodes.includes(a.code),
+  );
 
   return (
     <section className="card space-y-4 p-5">
@@ -50,7 +65,7 @@ export function AllergensEditor({ allergens }: { allergens: Allergen[] }) {
       )}
 
       <ul>
-        {allergens.map((a) => (
+        {visibleAllergens.map((a) => (
           <li key={a.code} className="border-b border-line py-3 last:border-b-0">
             {editing === a.code ? (
               <AllergenForm allergen={a} onDone={() => setEditing(null)} />
@@ -74,7 +89,9 @@ export function AllergensEditor({ allergens }: { allergens: Allergen[] }) {
                     className="font-semibold text-danger"
                     onClick={() =>
                       confirm(`Remover o alergénio «${a.name_pt}»?`) &&
-                      run(deleteAllergen(a.code))
+                      run(deleteAllergen(a.code), () =>
+                        setRemovedCodes((prev) => [...prev, a.code]),
+                      )
                     }
                   >
                     Remover
@@ -91,7 +108,9 @@ export function AllergensEditor({ allergens }: { allergens: Allergen[] }) {
                         danger: true,
                         onClick: () =>
                           confirm(`Remover o alergénio «${a.name_pt}»?`) &&
-                          run(deleteAllergen(a.code)),
+                          run(deleteAllergen(a.code), () =>
+                            setRemovedCodes((prev) => [...prev, a.code]),
+                          ),
                       },
                     ]}
                   />

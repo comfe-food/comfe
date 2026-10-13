@@ -36,14 +36,37 @@ export function MenuEditor({
     null,
   );
   const [editingOptions, setEditingOptions] = useState<Dish | null>(null);
+  const [removedCategoryIds, setRemovedCategoryIds] = useState<string[]>([]);
+  const [removedDishIds, setRemovedDishIds] = useState<string[]>([]);
 
-  async function run(action: Promise<ActionResult>) {
-    const result = await action;
-    if (!result.ok) setError(result.error ?? "Erro ao guardar.");
-    router.refresh();
+  async function run(action: Promise<ActionResult>, onSuccess?: () => void) {
+    try {
+      const result = await action;
+      if (!result.ok) {
+        setError(result.error ?? "Erro ao guardar.");
+        return;
+      }
+      setError(null);
+      onSuccess?.();
+    } catch {
+      setError("Erro de ligação. Tenta novamente.");
+    } finally {
+      router.refresh();
+    }
   }
 
-  const uncategorized = dishes.filter((dish) => !dish.category_id);
+  const visibleCategories = categories.filter(
+    (cat) => !removedCategoryIds.includes(cat.id),
+  );
+  const visibleDishes = dishes
+    .filter((dish) => !removedDishIds.includes(dish.id))
+    .map((dish) =>
+      dish.category_id && removedCategoryIds.includes(dish.category_id)
+        ? { ...dish, category_id: null }
+        : dish,
+    );
+
+  const uncategorized = visibleDishes.filter((dish) => !dish.category_id);
   const optionsDish =
     editingOptions ??
     (editingDish && editingDish !== "new" ? editingDish : null);
@@ -91,7 +114,7 @@ export function MenuEditor({
         <DishForm
           key={editingDish === "new" ? "new" : editingDish.id}
           dish={editingDish === "new" ? undefined : editingDish}
-          categories={categories}
+          categories={visibleCategories}
           allergens={allergens}
           onDone={() => setEditingDish(null)}
         />
@@ -108,14 +131,14 @@ export function MenuEditor({
       <section className="card p-5">
         <h2 className="section-title">Categorias</h2>
 
-        {categories.length === 0 && (
+        {visibleCategories.length === 0 && (
           <p className="text-sm text-ink-muted">
             Ainda não há categorias — cria a primeira.
           </p>
         )}
 
         <ul>
-          {categories.map((cat) => (
+          {visibleCategories.map((cat) => (
             <li key={cat.id} className="border-b border-line py-3 last:border-b-0">
               {editingCategory === cat.id ? (
                 <CategoryForm
@@ -146,7 +169,9 @@ export function MenuEditor({
                       type="button"
                       onClick={() =>
                         confirm(`Remover a categoria «${cat.name}»?`) &&
-                        run(deleteCategory(cat.id))
+                        run(deleteCategory(cat.id), () =>
+                          setRemovedCategoryIds((prev) => [...prev, cat.id]),
+                        )
                       }
                       className="font-semibold text-danger"
                     >
@@ -170,7 +195,9 @@ export function MenuEditor({
                           danger: true,
                           onClick: () =>
                             confirm(`Remover a categoria «${cat.name}»?`) &&
-                            run(deleteCategory(cat.id)),
+                            run(deleteCategory(cat.id), () =>
+                              setRemovedCategoryIds((prev) => [...prev, cat.id]),
+                            ),
                         },
                       ]}
                     />
@@ -191,14 +218,14 @@ export function MenuEditor({
       <section className="space-y-5">
         <h2 className="section-title">Pratos</h2>
 
-        {categories.length === 0 && dishes.length === 0 && (
+        {visibleCategories.length === 0 && visibleDishes.length === 0 && (
           <p className="text-sm text-ink-muted">
             Cria uma categoria e depois adiciona os pratos.
           </p>
         )}
 
-        {categories.map((cat) => {
-          const items = dishes.filter((dish) => dish.category_id === cat.id);
+        {visibleCategories.map((cat) => {
+          const items = visibleDishes.filter((dish) => dish.category_id === cat.id);
           return (
             <div key={cat.id} className="card p-5">
               <h3 className="mb-2 text-lg">{cat.name}</h3>
@@ -234,7 +261,9 @@ export function MenuEditor({
                       }
                       onDelete={() =>
                         confirm(`Remover o prato «${dish.name}»?`) &&
-                        run(deleteDish(dish.id))
+                        run(deleteDish(dish.id), () =>
+                          setRemovedDishIds((prev) => [...prev, dish.id]),
+                        )
                       }
                     />
                   ))}
@@ -274,7 +303,9 @@ export function MenuEditor({
                   }
                   onDelete={() =>
                     confirm(`Remover o prato «${dish.name}»?`) &&
-                    run(deleteDish(dish.id))
+                    run(deleteDish(dish.id), () =>
+                      setRemovedDishIds((prev) => [...prev, dish.id]),
+                    )
                   }
                 />
               ))}

@@ -11,6 +11,7 @@ import type { AdminOrder } from "@/lib/data/admin-orders";
 import { ActionMenu } from "@/components/admin/action-menu";
 import { formatEuro, formatTime } from "@/lib/format";
 import type { OrderStatus } from "@/lib/types";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import { getBrowserClient } from "@/lib/supabase/client";
 
 const SOUND_URL = "/sounds/new-order.wav";
@@ -48,24 +49,41 @@ export function OrdersBoard({ initialOrders }: { initialOrders: AdminOrder[] }) 
     [orders],
   );
 
-  // Realtime: novo pedido ou mudanças sem re-carregar a página
+  // Realtime: novo pedido ou mudanças sem re-carregar a página.
+  // A sessão vive em cookies e só fica disponível no cliente de forma
+  // assíncrona; se subscrevêssemos antes disso, o canal juntava-se sem
+  // autenticação e o RLS bloqueava todos os eventos. Por isso esperamos pela
+  // sessão e autenticamos o Realtime antes de subscrever.
   useEffect(() => {
+    let cancelled = false;
+    let channel: RealtimeChannel | undefined;
     const supabase = getBrowserClient();
-    const channel = supabase
-      .channel("admin-orders")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "orders" },
-        () => router.refresh(),
-      )
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "orders" },
-        () => router.refresh(),
-      )
-      .subscribe();
+
+    async function subscribe() {
+      const { data } = await supabase.auth.getSession();
+      if (cancelled || !data.session) return;
+      await supabase.realtime.setAuth(data.session.access_token);
+      if (cancelled) return;
+      channel = supabase
+        .channel("admin-orders")
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "orders" },
+          () => router.refresh(),
+        )
+        .on(
+          "postgres_changes",
+          { event: "UPDATE", schema: "public", table: "orders" },
+          () => router.refresh(),
+        )
+        .subscribe();
+    }
+
+    subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      cancelled = true;
+      if (channel) supabase.removeChannel(channel);
     };
   }, [router]);
 
