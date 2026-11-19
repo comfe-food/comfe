@@ -19,6 +19,7 @@
   /* Acento único */
   --color-accent: #414770;
   --color-accent-dark: #343a5c;
+  --color-accent-soft: #eef0f7;
 
   /* Estados semânticos */
   --color-danger: #b02a1b;
@@ -193,6 +194,69 @@
     font-family: var(--font-display);
     font-size: var(--text-2xl);
     margin-bottom: 1rem;
+  }
+
+  .admin-surface {
+    background-color: var(--color-paper);
+    background-image: linear-gradient(
+      to bottom,
+      rgba(65, 71, 112, 0.07),
+      rgba(247, 243, 234, 0) 24rem
+    );
+  }
+
+  .admin-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-base);
+    box-shadow:
+      0 1px 2px rgba(26, 26, 26, 0.04),
+      0 10px 28px rgba(26, 26, 26, 0.05);
+  }
+
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex: none;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-base);
+    background-color: var(--color-surface);
+    color: var(--color-ink-muted);
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease,
+      background-color 0.15s ease;
+    cursor: pointer;
+  }
+
+  .icon-btn:hover:not(:disabled) {
+    border-color: var(--color-accent);
+    background-color: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+
+  .alert {
+    border: 1px solid;
+    border-left-width: 3px;
+    border-radius: var(--radius-base);
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+
+  .alert-error {
+    border-color: rgba(176, 42, 27, 0.35);
+    background-color: var(--color-danger-soft);
+    color: var(--color-danger);
+  }
+
+  .alert-success {
+    border-color: rgba(31, 107, 58, 0.35);
+    background-color: var(--color-success-soft);
+    color: var(--color-success);
   }
 }
 

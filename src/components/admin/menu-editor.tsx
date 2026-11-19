@@ -31,6 +31,7 @@ export function MenuEditor({
 }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
   const [editingDish, setEditingDish] = useState<Dish | "new" | null>(null);
   const [editingCategory, setEditingCategory] = useState<string | "new" | null>(
     null,
@@ -66,45 +67,87 @@ export function MenuEditor({
         : dish,
     );
 
-  const uncategorized = visibleDishes.filter((dish) => !dish.category_id);
+  const normalizedQuery = query.trim().toLocaleLowerCase("pt-PT");
+  const matches = (value: string) =>
+    value.toLocaleLowerCase("pt-PT").includes(normalizedQuery);
+  const filteredDishes = visibleDishes.filter(
+    (dish) =>
+      !normalizedQuery ||
+      matches(dish.name) ||
+      matches(dish.description ?? ""),
+  );
+  const filteredCategories = visibleCategories.filter(
+    (cat) =>
+      !normalizedQuery ||
+      matches(cat.name) ||
+      filteredDishes.some((dish) => dish.category_id === cat.id),
+  );
+  const uncategorized = filteredDishes.filter((dish) => !dish.category_id);
   const optionsDish =
     editingOptions ??
     (editingDish && editingDish !== "new" ? editingDish : null);
 
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 space-y-6 px-4 py-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl">Menu</h1>
-        <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={() => {
-              setEditingCategory("new");
-              setEditingDish(null);
-              setEditingOptions(null);
-            }}
-            className="btn btn-secondary"
-          >
-            Nova categoria
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setEditingDish("new");
-              setEditingCategory(null);
-              setEditingOptions(null);
-            }}
-            className="btn btn-primary"
-          >
-            Novo prato
-          </button>
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-2xs font-bold uppercase tracking-[0.2em] text-accent">
+              Carta
+            </p>
+            <h1 className="mt-1 text-3xl">Menu</h1>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setEditingCategory("new");
+                setEditingDish(null);
+                setEditingOptions(null);
+              }}
+              className="btn btn-secondary"
+            >
+              Nova categoria
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEditingDish("new");
+                setEditingCategory(null);
+                setEditingOptions(null);
+              }}
+              className="btn btn-primary"
+            >
+              Novo prato
+            </button>
+          </div>
+        </div>
+        <div className="admin-card flex items-center gap-2 px-3 py-2">
+          <SearchIcon />
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Procurar categoria ou prato"
+            aria-label="Procurar no menu"
+            className="min-h-11 w-full bg-transparent text-sm placeholder:text-ink-muted"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              className="text-xs font-bold text-accent hover:underline"
+            >
+              Limpar
+            </button>
+          )}
         </div>
       </div>
 
       {error && (
         <p
           role="alert"
-          className="border border-danger/40 bg-danger-soft px-4 py-3 text-sm font-bold text-danger"
+          className="alert alert-error"
         >
           {error}
         </p>
@@ -128,17 +171,19 @@ export function MenuEditor({
         />
       )}
 
-      <section className="card p-5">
+      <section className="admin-card p-5">
         <h2 className="section-title">Categorias</h2>
 
-        {visibleCategories.length === 0 && (
+        {filteredCategories.length === 0 && (
           <p className="text-sm text-ink-muted">
-            Ainda não há categorias — cria a primeira.
+            {normalizedQuery
+              ? "Nenhuma categoria corresponde à pesquisa."
+              : "Ainda não há categorias — cria a primeira."}
           </p>
         )}
 
         <ul>
-          {visibleCategories.map((cat) => (
+          {filteredCategories.map((cat) => (
             <li key={cat.id} className="border-b border-line py-3 last:border-b-0">
               {editingCategory === cat.id ? (
                 <CategoryForm
@@ -218,17 +263,24 @@ export function MenuEditor({
       <section className="space-y-5">
         <h2 className="section-title">Pratos</h2>
 
-        {visibleCategories.length === 0 && visibleDishes.length === 0 && (
+        {filteredCategories.length === 0 && filteredDishes.length === 0 && (
           <p className="text-sm text-ink-muted">
-            Cria uma categoria e depois adiciona os pratos.
+            {normalizedQuery
+              ? "Nenhum prato corresponde à pesquisa."
+              : "Cria uma categoria e depois adiciona os pratos."}
           </p>
         )}
 
-        {visibleCategories.map((cat) => {
-          const items = visibleDishes.filter((dish) => dish.category_id === cat.id);
+        {filteredCategories.map((cat) => {
+          const items = filteredDishes.filter((dish) => dish.category_id === cat.id);
           return (
-            <div key={cat.id} className="card p-5">
-              <h3 className="mb-2 text-lg">{cat.name}</h3>
+            <div key={cat.id} className="admin-card p-5">
+              <h3 className="mb-2 flex items-center gap-2 text-lg">
+                {cat.name}
+                <span className="text-xs font-semibold text-ink-muted">
+                  {items.length}
+                </span>
+              </h3>
               {items.length === 0 ? (
                 <p className="text-sm text-ink-muted">Sem pratos.</p>
               ) : (
@@ -274,7 +326,7 @@ export function MenuEditor({
         })}
 
         {uncategorized.length > 0 && (
-          <div className="card p-5">
+          <div className="admin-card p-5">
             <h3 className="mb-2 text-lg">Sem categoria</h3>
             <ul>
               {uncategorized.map((dish) => (
@@ -414,5 +466,24 @@ function DishRow({
         />
       </div>
     </li>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      width="17"
+      height="17"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      className="shrink-0 text-ink-muted"
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path d="m16.5 16.5 4 4" />
+    </svg>
   );
 }

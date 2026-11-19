@@ -55,7 +55,7 @@ export function OptionGroupsEditor({
     }));
 
   return (
-    <section className="card space-y-4 p-5">
+    <section className="admin-card space-y-4 p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="section-title mb-0">Acompanhamentos</h2>
         <button
@@ -78,7 +78,7 @@ export function OptionGroupsEditor({
       {error && (
         <p
           role="alert"
-          className="border border-danger/40 bg-danger-soft px-4 py-3 text-sm font-bold text-danger"
+          className="alert alert-error"
         >
           {error}
         </p>

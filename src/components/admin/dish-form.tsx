@@ -29,13 +29,13 @@ export function DishForm({
   const imageUrl = removeImage ? null : dish?.image_url ?? null;
 
   return (
-    <form action={action} className="card space-y-4 p-5">
+    <form action={action} className="admin-card space-y-4 p-5">
       <h2 className="section-title">{dish ? "Editar prato" : "Novo prato"}</h2>
 
       {state.error && (
         <p
           role="alert"
-          className="border border-danger/40 bg-danger-soft px-4 py-3 text-sm font-bold text-danger"
+          className="alert alert-error"
         >
           {state.error}
         </p>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { saveSiteSettings } from "@/app/admin/settings-actions";
 import type { SiteSettingsMap } from "@/lib/types";
 
@@ -36,27 +36,51 @@ export function SettingsForm({ settings }: { settings: SiteSettingsMap }) {
   const [state, action, pending] = useActionState(saveSiteSettings, {
     ok: false,
   });
+  const [dirty, setDirty] = useState(false);
+  const hasUnsavedChanges = dirty || Boolean(state.error);
+
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [hasUnsavedChanges]);
 
   return (
-    <form action={action} className="mt-6 space-y-6">
+    <form
+      action={action}
+      onChange={() => setDirty(true)}
+      onSubmit={() => setDirty(false)}
+      className="mt-6 space-y-6"
+    >
       {state.error && (
-        <p
-          role="alert"
-          className="border border-danger/40 bg-danger-soft px-4 py-3 text-sm font-bold text-danger"
-        >
+        <p role="alert" className="alert alert-error">
           {state.error}
         </p>
       )}
       {state.message && (
-        <p
-          role="status"
-          className="border border-success/40 bg-success-soft px-4 py-3 text-sm font-bold text-success"
-        >
+        <p role="status" className="alert alert-success">
           {state.message}
         </p>
       )}
 
-      <section className="card space-y-4 p-5">
+      <div className="admin-card flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+        <p className="flex items-center gap-2 text-sm font-semibold text-ink-muted">
+          <span
+            className={`h-2 w-2 rounded-full ${hasUnsavedChanges ? "bg-warning" : "bg-success"}`}
+          />
+          {hasUnsavedChanges
+            ? "Alterações por guardar"
+            : state.message
+              ? "Alterações guardadas"
+              : "Sem alterações pendentes"}
+        </p>
+        <button type="submit" disabled={pending} className="btn btn-primary">
+          {pending ? "A guardar…" : "Guardar definições"}
+        </button>
+      </div>
+
+      <section className="admin-card space-y-4 p-5">
         <h2 className="section-title">Identidade e contactos</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Nome">
@@ -108,7 +132,7 @@ export function SettingsForm({ settings }: { settings: SiteSettingsMap }) {
         </Field>
       </section>
 
-      <section className="card space-y-4 p-5">
+      <section className="admin-card space-y-4 p-5">
         <h2 className="section-title">Página inicial</h2>
         <Field label="Título">
           <input
@@ -158,7 +182,7 @@ export function SettingsForm({ settings }: { settings: SiteSettingsMap }) {
         </Field>
       </section>
 
-      <section className="card space-y-4 p-5">
+      <section className="admin-card space-y-4 p-5">
         <h2 className="section-title">Horário e pedidos</h2>
         <label className="flex items-center gap-3">
           <input
@@ -242,7 +266,10 @@ export function SettingsForm({ settings }: { settings: SiteSettingsMap }) {
         defaultValue={settings.mbway_payee ?? ""}
       />
 
-      <div className="flex items-center gap-4">
+      <div className="admin-card flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+        <p className="text-sm text-ink-muted">
+          As alterações publicadas aparecem no site de imediato.
+        </p>
         <button type="submit" disabled={pending} className="btn btn-primary">
           {pending ? "A guardar…" : "Guardar definições"}
         </button>
